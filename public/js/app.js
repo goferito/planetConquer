@@ -1,26 +1,19 @@
 
 function init(){
 
-  var turnTime = 2000; // Players can send ships every two seconds
-
-  var conquerors = [
-    { name: 'Saa',  color: 'blue',  ai: culoVeo },
-    { name: 'Adam', color: 'red',   ai: culoVeo },
-    { name: 'Tilo', color: 'green', ai: culoVeo },
-    { name: 'Ray', color: 'pink', ai: lazyReporter }
-  ];
-
+  // Players can send ships every two seconds
+  var turnTime = 2000;
 
   var canvas = document.getElementById('battlefield');
   var context = canvas.getContext('2d');
 
-  var myScene = new Scene(conquerors,
-                          30,
+  var myScene = new Scene(conquerors_config.conquerors,
+                          conquerors_config.conquerorsInitialShips,
                           context);
 
   myScene.startDrawing();
 
-  var players = conquerors.map(function(c){
+  var players = conquerors_config.conquerors.map(function(c){
     return new Player(c.name, c.color, c.ai, myScene);
   });
   
