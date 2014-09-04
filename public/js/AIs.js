@@ -34,14 +34,22 @@
  *   this.getMyPlanets() 
  *     Returns an array with the planet objects owned by the player
  *
- *   this.getAllPlanets()
+ *   this.getPlanets()
  *     Returns an array with all the planet objects
  *
  *   this.getMyFleets()
  *     Returns an array with the fleets owned by the player
  *
- *   this.getAllFleets()
+ *   this.getFleets()
  *     Returns any array with all the fleet in the game
+ *
+ *   this.sendFleet(<Object> Origin, <Object> Destination, <Number> Ships)
+ *     Sends a fleet from the origin planet to the destination planet,
+ *     containing the specified number of ships.
+ *     Returns false if the fleet cannot be sent because:
+ *      - Origin's owner doesn't match the player's name
+ *      - Origin's ships are less than the requested ships to be sent
+ *     Returns true otherwise
  *
  */
 

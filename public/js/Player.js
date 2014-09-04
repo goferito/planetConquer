@@ -53,10 +53,10 @@ Player.prototype.getFleets = function(){
 Player.prototype.sendFleet = function(origin, dest, ships){
   if(origin.owner != this.name){
     console.error('Player sending a fleet from a not owned Planet');
-    return;
+    return false;
   }
 
-  this.scene.sendFleet(origin, dest, ships)
+  return this.scene.sendFleet(origin, dest, ships)
   
 };
 

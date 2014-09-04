@@ -277,6 +277,8 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
     start: new Date()
   });
 
+  return true;
+
 };
 
 
