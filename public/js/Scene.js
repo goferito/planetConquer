@@ -9,8 +9,10 @@ var Scene = function(conquerors,
     return conqs;
   }, {});
   this._initialShips = initialShips;
+  this._initialPlanetRatio = 5;
   this._context = context;
-  this._planets = this.generatePlanets(this._numConquerors,
+  this._planets = this.generatePlanets(conquerors,
+                                       this._initialPlanetRatio,
                                        this._initialShips);
   this._fleets = [];
   this._speed = 0.05;
@@ -19,19 +21,34 @@ var Scene = function(conquerors,
 };
 
 
-Scene.prototype.generatePlanets = function(numConquerors,
-                                           conquerorShips){
-  //TODO generate this ramdomly
-  return [
-    { x: 100, y: 100, owner: 'Saa',  ratio: 5, ships: conquerorShips },
-    { x: 400, y: 150, owner: 'Adam', ratio: 5, ships: conquerorShips },
-    { x: 600, y: 300, owner: 'Tilo', ratio: 5, ships: conquerorShips },
-    { x: 50,  y: 200, ratio: 1, ships: 1 },
-    { x: 100, y: 300, ratio: 2, ships: 10 },
-    { x: 200, y: 150, ratio: 3, ships: 200 },
-    { x: 300, y: 150, ratio: 4, ships: 1 },
-    { x: 400, y: 250, ratio: 5, ships: 3 },
+Scene.prototype.generatePlanets = function(conquerors,
+                                           conquerorsRatio,
+                                           conquerorsShips){
+  //TODO create more maps
+  var maps =  [
+    [
+      { x: 100, y: 100, ratio: 5, ships: 3 },
+      { x: 400, y: 150, ratio: 5, ships: 25 },
+      { x: 600, y: 300, ratio: 5, ships: 45 },
+      { x: 50,  y: 200, ratio: 1, ships: 1 },
+      { x: 100, y: 300, ratio: 2, ships: 10 },
+      { x: 200, y: 150, ratio: 3, ships: 200 },
+      { x: 300, y: 150, ratio: 4, ships: 1 },
+      { x: 400, y: 250, ratio: 5, ships: 3 },
+    ]
   ];
+
+  var mapPos = Math.floor(Math.random() * maps.length)
+    , map = maps[mapPos]
+
+  //Put the players in the first planets
+  conquerors.forEach(function(conq, i){
+    map[i].owner = conq.name;
+    map[i].ratio = conquerorsRatio;
+    map[i].ships = conquerorsShips;
+  });
+
+  return map;
 };
 
 
