@@ -7,7 +7,7 @@ function init(){
     { name: 'Saa',  color: 'blue',  ai: culoVeo },
     { name: 'Adam', color: 'red',   ai: culoVeo },
     { name: 'Tilo', color: 'green', ai: culoVeo },
-    { name: 'Ray', color: 'pink', ai: culoVeo }
+    { name: 'Ray', color: 'pink', ai: lazyReporter }
   ];
 
 

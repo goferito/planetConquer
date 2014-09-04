@@ -38,6 +38,7 @@ Scene.prototype.generatePlanets = function(conquerors,
     ]
   ];
 
+  //TODO test this
   var mapPos = Math.floor(Math.random() * maps.length)
     , map = maps[mapPos]
 
