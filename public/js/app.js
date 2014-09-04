@@ -1,13 +1,14 @@
 
 function init(){
 
-  var turnTime = 2000; // Players can send ships every second
+  var turnTime = 2000; // Players can send ships every two seconds
 
   var conquerors = [
     { name: 'Saa',  color: 'blue',  ai: culoVeo },
     { name: 'Adam', color: 'red',   ai: culoVeo },
     { name: 'Tilo', color: 'green', ai: culoVeo }
   ];
+
 
   var canvas = document.getElementById('battlefield');
   var context = canvas.getContext('2d');

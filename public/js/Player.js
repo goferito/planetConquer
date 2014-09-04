@@ -4,7 +4,6 @@ var Player = function(name, color, ai, scene){
   this.color = color;
   this.ai = ai || function(){};
 
-  // esto igual no hace falta no?
   this.scene = scene;
 
 };
@@ -22,11 +21,17 @@ Player.prototype.getMyPlanets = function(){
 };
 
 
+/**
+ * Returns an array with all the planets
+ */
 Player.prototype.getPlanets = function(){
   return this.scene.getPlanets();
 };
 
 
+/**
+ * Returns an array with the fleets owned by the player
+ */
 Player.prototype.getMyFleets = function(){
   return this.scene.getFleets().filter(function(f){
     return f.owner == this.name;
@@ -34,11 +39,17 @@ Player.prototype.getMyFleets = function(){
 };
 
 
+/**
+ * Returns an array with all the fleets
+ */
 Player.prototype.getFleets = function(){
   return this.scene.getFleets();
 };
 
 
+/**
+ * Throw a new fleet
+ */
 Player.prototype.sendFleet = function(origin, dest, ships){
   if(origin.owner != this.name){
     console.error('Player sending a fleet from a not owned Planet');
@@ -48,14 +59,4 @@ Player.prototype.sendFleet = function(origin, dest, ships){
   this.scene.sendFleet(origin, dest, ships)
   
 };
-
-/**
- * Take the decisions
- */
-Player.prototype.command = function(){
-
-  console.log(this.scene.get);
-  
-};
-
 

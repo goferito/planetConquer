@@ -190,6 +190,9 @@ Scene.prototype.startDrawing = function(){
 };
 
 
+/**
+ * Removes the fleets that have already got to their destination
+ */
 Scene.prototype.updateFleets = function(){
 
     var t = new Date()
