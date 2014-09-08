@@ -1,7 +1,7 @@
 
 var Scene = function(conquerors,
                      initialShips,
-                     context){
+                     context, container){
 
   this._numConquerors = conquerors.length;
   this._conquerors = conquerors.reduce(function(conqs, c){
@@ -18,6 +18,55 @@ var Scene = function(conquerors,
   this._speed = 0.05;
   this._drawingInterval = 100;
 
+  // 3d 
+
+  this.container = container;
+  this.scene = new THREE.Scene();
+  this.clock = new THREE.Clock();
+
+  this.camera = new THREE.PerspectiveCamera(
+        45, 
+        window.innerWidth / window.innerHeight, 
+        1, 
+        5000
+  );
+
+  this.camera.position.z = 500;
+
+  var light01 = new THREE.DirectionalLight(0xffffff, 0.7);
+  light01.position.set(1, 1, 1);
+  this.scene.add(light01);
+
+  this.planetMaterial = new THREE.MeshPhongMaterial({
+    color: 0xff4444,
+    wireframe: false,
+    shininess: 50
+  });
+
+  this.renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: true
+  });
+
+  this._planets.forEach(function (planet) {
+    planet.mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(8, 32, 32), 
+      this.planetMaterial
+    );
+
+    planet.mesh.position.x = planet.x;
+    planet.mesh.position.y = planet.y;
+    console.log(planet)
+
+    this.scene.add(planet.mesh);
+  }.bind(this));
+
+  this.renderer.setSize(window.innerWidth, window.innerHeight);
+  this.renderer.setClearColor(0xeeeeee);
+  this.animate();
+  
+  document.body.appendChild(this.renderer.domElement);
 };
 
 
@@ -27,16 +76,28 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: 100, y: 100, ratio: 5, ships: 3 },
-      { x: 400, y: 150, ratio: 5, ships: 25 },
-      { x: 600, y: 300, ratio: 5, ships: 45 },
-      { x: 50,  y: 200, ratio: 1, ships: 1 },
-      { x: 100, y: 300, ratio: 2, ships: 10 },
-      { x: 200, y: 150, ratio: 3, ships: 200 },
-      { x: 300, y: 150, ratio: 4, ships: 1 },
-      { x: 400, y: 250, ratio: 5, ships: 3 },
+      { x: -10, y: -10, ratio: 5, ships: 3 },
+      { x: -80, y: 15, ratio: 5, ships: 25 },
+      { x: -120, y: -60, ratio: 5, ships: 45 },
+      { x: 10,  y: 120, ratio: 1, ships: 1 },
+      { x: 100, y: 80, ratio: 2, ships: 10 },
+      { x: 180, y: -110, ratio: 3, ships: 200 },
+      { x: -200, y: -150, ratio: 4, ships: 1 },
+      { x: -200, y: 100, ratio: 5, ships: 3 },
     ]
   ];
+  // var maps =  [
+  //   [
+  //     { x: 100, y: 100, ratio: 5, ships: 3 },
+  //     { x: 400, y: 150, ratio: 5, ships: 25 },
+  //     { x: 600, y: 300, ratio: 5, ships: 45 },
+  //     { x: 50,  y: 200, ratio: 1, ships: 1 },
+  //     { x: 100, y: 300, ratio: 2, ships: 10 },
+  //     { x: 200, y: 150, ratio: 3, ships: 200 },
+  //     { x: 300, y: 150, ratio: 4, ships: 1 },
+  //     { x: 400, y: 250, ratio: 5, ships: 3 },
+  //   ]
+  // ];
 
   //TODO test this
   var mapPos = Math.floor(Math.random() * maps.length)
@@ -90,7 +151,6 @@ Scene.prototype.getConquerorColor = function(conqId){
            ? 'gray'
            : this._conquerors[conqId].color || 'gray';
 };
-
 
 /**
  * Draws the scene into a canvas context
@@ -205,6 +265,15 @@ Scene.prototype.startDrawing = function(){
     _this.updateFleets();
     _this.drawScene(_this._context);
   }, this._drawingInterval);
+};
+
+Scene.prototype.render = function (dt) {
+  this.renderer.render(this.scene, this.camera);
+};
+
+Scene.prototype.animate = function () {
+  requestAnimationFrame(this.animate.bind(this));
+  this.render(this.clock.getDelta());
 };
 
 

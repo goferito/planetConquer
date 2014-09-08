@@ -3,3 +3,8 @@ canvas {
   display: block;
   margin: auto;
 }
+#battlefieldContainer {
+  border: 1px solid #808080;
+  display: block;
+  margin: auto;
+}

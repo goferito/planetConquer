@@ -7,9 +7,12 @@ function init(){
   var canvas = document.getElementById('battlefield');
   var context = canvas.getContext('2d');
 
+  var container = document.getElementById('battlefield');
+
   var myScene = new Scene(conquerors_config.conquerors,
                           conquerors_config.conquerorsInitialShips,
-                          context);
+                          context,
+                          container);
 
   myScene.startDrawing();
 
