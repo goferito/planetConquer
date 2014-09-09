@@ -109,27 +109,27 @@ Scene.prototype.initRenderer = function () {
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
@@ -137,27 +137,23 @@ Scene.prototype.initRenderer = function () {
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dank1200.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.png'),
-      shininess: 50,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.png'),
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.jpg'),
       shininess: 50,
     }),
   ];
