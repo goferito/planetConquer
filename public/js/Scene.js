@@ -528,8 +528,11 @@ Scene.prototype.createShip = function (origin, dest) {
 
   mesh.lookAt(target);
 
+  var dist = getDistance(origin, dest);
+  var tt = dist / this._speed;
+
   var tween = new TWEEN.Tween(mesh.position)
-    .to(target, 5000)
+    .to(target, tt)
     .easing(TWEEN.Easing.Linear.None)
     .onComplete(function () {
       this.scene.remove(mesh);
