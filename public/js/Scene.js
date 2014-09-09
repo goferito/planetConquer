@@ -1,7 +1,6 @@
 
 var Scene = function(conquerors,
-                     initialShips,
-                     context){
+                     initialShips){
 
   this._numConquerors = conquerors.length;
   this._conquerors = conquerors.reduce(function(conqs, c){
@@ -10,7 +9,6 @@ var Scene = function(conquerors,
   }, {});
   this._initialShips = initialShips;
   this._initialPlanetRatio = 5;
-  this._context = context;
   this._planets = this.generatePlanets(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
@@ -18,8 +16,194 @@ var Scene = function(conquerors,
   this._speed = 0.05;
   this._drawingInterval = 100;
 
+  this.initRenderer();
 };
 
+Scene.prototype.initRenderer = function () {
+  this.scene = new THREE.Scene();
+  this.sceneCube = new THREE.Scene();
+  this.clock = new THREE.Clock();
+
+  this.camera = new THREE.PerspectiveCamera(
+        45, 
+        window.innerWidth / window.innerHeight, 
+        1, 
+        5000
+  );
+
+  this.camera.position.z = 500;
+  this.camera.updateMatrixWorld();
+  this.cameraCube = this.camera.clone();
+
+  var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
+  light01.position.set(1, 1, 1);
+  this.scene.add(light01);
+
+  var light02 = new THREE.DirectionalLight(0xffffff, 0.9);
+  light02.position.set(-1, -1, 1);
+  // this.scene.add(light02);
+
+  this.scene.add(new THREE.AmbientLight(0x555555));
+  this.projector = new THREE.Projector();
+
+  var urls = [
+    'px.jpg', 'nx.jpg',
+    'py.jpg', 'ny.jpg',
+    'pz.jpg', 'nz.jpg'
+  ].map(function(e) {
+    return 'assets/env/' + e;
+  });
+
+  this.environmentMap = THREE.ImageUtils.loadTextureCube(urls);
+
+  var shader = THREE.ShaderLib['cube'];
+  shader.uniforms['tCube'].value = this.environmentMap;
+
+  var material = new THREE.ShaderMaterial({
+    fragmentShader: shader.fragmentShader,
+    vertexShader: shader.vertexShader,
+    uniforms: shader.uniforms,
+    depthWrite: false,
+    side: THREE.BackSide
+  });
+
+  var skyBox = new THREE.Mesh(new THREE.BoxGeometry(1200, 1200, 1200), material);
+  this.sceneCube.add(skyBox);
+
+  this.planetMaterials = [
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/earthmap1k.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/jupitermap.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/mars_1k_color.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/mercurymap.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/neptunemap.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/plutomap1k.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/saturnmap.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/venusmap.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/Planet_Avalon_1600.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.jpg'),
+      shininess: 50,
+    }),
+  ];
+
+  this.renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: true
+  });
+
+  this._planets.forEach(function (planet) {
+    var radius = Math.random() * 15 + 10;
+    planet.mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(radius, 32, 32), 
+      this.planetMaterials[
+        Math.floor((Math.random() * this.planetMaterials.length))
+      ]
+    );
+
+    planet.mesh.position.x = planet.x;
+    planet.mesh.position.y = planet.y;
+    // planet.mesh.position.z = Math.random() * 400 - 200;
+
+    this.scene.add(planet.mesh);
+
+    var pos2d = this.toXYCoords(planet.mesh.position);
+
+    var text = document.createElement('div');
+    text.className = 'planetLabel';
+    text.innerHTML = this.getLabels(planet);
+    text.style.top = parseInt(pos2d.y) + 'px';
+    text.style.left = parseInt(pos2d.x) + 'px';
+    document.body.appendChild(text);
+
+    planet.text = text;
+  }.bind(this));
+
+  this.renderer.setSize(window.innerWidth, window.innerHeight);
+  this.renderer.setClearColor(0x000000);
+  this.animate();
+  
+  document.body.appendChild(this.renderer.domElement);
+};
+
+Scene.prototype.toXYCoords = function (pos) {
+  var vector = this.projector.projectVector(pos.clone(), this.camera);
+  vector.x = (vector.x + 1)/2 * window.innerWidth;
+  vector.y = -(vector.y - 1)/2 * window.innerHeight;
+  return vector;
+};
 
 Scene.prototype.generatePlanets = function(conquerors,
                                            conquerorsRatio,
@@ -27,14 +211,14 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: 100, y: 100, ratio: 5, ships: 3 },
-      { x: 400, y: 150, ratio: 5, ships: 25 },
-      { x: 600, y: 300, ratio: 5, ships: 45 },
-      { x: 50,  y: 200, ratio: 1, ships: 1 },
-      { x: 100, y: 300, ratio: 2, ships: 10 },
-      { x: 200, y: 150, ratio: 3, ships: 200 },
-      { x: 300, y: 150, ratio: 4, ships: 1 },
-      { x: 400, y: 250, ratio: 5, ships: 3 },
+      { x: -10, y: -10, ratio: 5, ships: 3 },
+      { x: -80, y: 15, ratio: 5, ships: 25 },
+      { x: -120, y: -60, ratio: 5, ships: 45 },
+      { x: 10,  y: 120, ratio: 1, ships: 1 },
+      { x: 100, y: 80, ratio: 2, ships: 10 },
+      { x: 180, y: -110, ratio: 3, ships: 200 },
+      { x: -200, y: -150, ratio: 4, ships: 1 },
+      { x: -200, y: 100, ratio: 5, ships: 3 },
     ]
   ];
 
@@ -52,14 +236,32 @@ Scene.prototype.generatePlanets = function(conquerors,
   return map;
 };
 
+Scene.prototype.updateLabels = function () {
+  for(var i in this._planets){
+    var p = this._planets[i];
+    p.ships += p.ratio;
+    p.text.innerHTML = this.getLabels(p);
+  }
+};
 
 Scene.prototype.growRatios = function(){
   for(var i in this._planets){
     var p = this._planets[i];
     p.ships += p.ratio;
   }
+
+  this.updateLabels();
 };
 
+Scene.prototype.getLabels = function (planet) {
+  var labels = '';
+  labels += '<label class="ships">' + planet.ships + '</label>';
+
+  if(planet.owner)
+    labels += '<label class="owner">' + planet.owner + '</label>';
+
+  return labels;
+};
 
 /**
  * Returns the planets array
@@ -69,7 +271,6 @@ Scene.prototype.getPlanets = function(){
   return this._planets;
 };
 
-
 /**
  * Returns the fleets array
  */
@@ -77,7 +278,6 @@ Scene.prototype.getFleets = function(){
   this.updateFleets();
   return this._fleets;
 };
-  
 
 /**
  * Return the color established for the given conqueror
@@ -91,122 +291,33 @@ Scene.prototype.getConquerorColor = function(conqId){
            : this._conquerors[conqId].color || 'gray';
 };
 
-
 /**
- * Draws the scene into a canvas context
- * @param <context> ctx - The canvas context
- * @returns <Scene> 
+ * Renders the 3d scene with Three.js
+ * @param <float> dt - elapsed time since last frame
  */
-Scene.prototype.drawScene = function(ctx){
+Scene.prototype.render = function (dt) {
+  this.cameraCube.rotation.copy(this.camera.rotation);
+  this.cameraCube.position.copy(this.camera.position);
 
-  var _this = this;
+  this.renderer.autoClear = false;
+  this.renderer.clear();
 
-  this._planets.forEach(function(planet){
-
-    // Draw coloured circle
-    ctx.globalAlpha = 1;
-    ctx.shadowColor = '#999';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.beginPath();
-    ctx.arc(planet.x,
-            planet.y,
-            planet.ratio * 5 + 10,
-            0,
-            2 * Math.PI,
-            false);
-    ctx.fillStyle = _this.getConquerorColor(planet.owner);
-    ctx.fill();
-
-    // Draw number of contained ships
-    ctx.fillStyle = 'white'
-    ctx.fillText(planet.ships,
-                 planet.x - 6,
-                 planet.y + 4);
-
-  });
-
-  // Current time, to check how far the fleets have already gone
-  var t = new Date();
-
-  // Draw travelling fleets
-  this._fleets.forEach(function(fleet, i){
-    
-    // Calculate fleet position
-    var dist = getDistance(fleet.origin, fleet.dest)
-
-      // Trip time
-      , tt = dist / _this._speed
-
-      // Elapsed time
-      , elapsed = t - fleet.start
-
-      // Percent travelled
-      , pTravelled = elapsed / tt
-
-      // X trip distance
-      , dx = fleet.dest.x - fleet.origin.x
-
-      // Current X
-      , cx = fleet.origin.x + dx * pTravelled
-
-      // Y trip distance
-      , dy = fleet.dest.y - fleet.origin.y
-
-      // Current X
-      , cy = fleet.origin.y + dy * pTravelled
-
-
-    // If already there, don't draw
-    if(pTravelled >= 1) return;
-
-    // Draw coloured circle
-    ctx.globalAlpha = 0.5;
-    ctx.shadowColor = '#999';
-    ctx.shadowBlur = 3;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
-    ctx.beginPath();
-    ctx.arc(cx,
-            cy,
-            3 + fleet.ships, // radio
-            0,
-            2 * Math.PI,
-            false);
-    ctx.fillStyle = _this.getConquerorColor(fleet.owner);
-    ctx.fill();
-
-    // Draw fleet route
-    ctx.globalAlpha = 0.3;
-    ctx.shadowBlur = 1;
-    ctx.shadowOffsetX = 3;
-    ctx.shadowOffsetY = 3;
-    ctx.beginPath();
-    ctx.moveTo(fleet.origin.x, fleet.origin.y);
-    ctx.lineTo(fleet.dest.x, fleet.dest.y);
-    ctx.stroke();
-    
-    // Draw number of contained ships
-    ctx.globalAlpha = 0.8;
-    ctx.fillStyle = 'white'
-    ctx.fillText(fleet.ships, cx - 2, cy + 3);
-
-  });
-}
-
-Scene.prototype.startDrawing = function(){
-  var _this = this;
-  setInterval(function(){
-    _this._context.clearRect(0,
-                            0,
-                            _this._context.canvas.offsetWidth,
-                            _this._context.canvas.offsetHeight);
-    _this.updateFleets();
-    _this.drawScene(_this._context);
-  }, this._drawingInterval);
+  this.renderer.render(this.sceneCube, this.cameraCube);
+  this.renderer.render(this.scene, this.camera);
 };
 
+Scene.prototype.animate = function () {
+  requestAnimationFrame(this.animate.bind(this));
+  var dt = this.clock.getDelta();
+
+  TWEEN.update();
+
+  this._planets.forEach(function (p) {
+    p.mesh.rotation.y += 0.15 * dt;
+  });
+
+  this.render(dt);
+};
 
 /**
  * Removes the fleets that have already got to their destination
@@ -259,6 +370,56 @@ Scene.prototype.updateFleets = function(){
 
 };
 
+Scene.prototype.createShip = function (origin, dest) {
+  var color = this.getConquerorColor(origin.owner);
+
+  var box = new THREE.BoxGeometry(0.7, 0.7, 5);
+  var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
+  var mesh = new THREE.Mesh(box, material);
+
+  mesh.position.copy(origin.mesh.position);
+  mesh.position.x += Math.random() * 8 - 4; 
+  mesh.position.y += Math.random() * 8 - 4;
+  // mesh.position.z = 20;
+
+  var target = dest.mesh.position.clone();
+  target.x += Math.random() * 12 - 6; 
+  target.y += Math.random() * 12 - 6;
+
+  mesh.lookAt(target);
+
+  var dist = mesh.position.distanceTo(target);
+  var tt = dist / this._speed;
+
+  var lineMaterial = new THREE.LineBasicMaterial({
+    color: color,
+    transparent: true,
+    opacity: 0.5
+  });
+
+  var lineGeometry = new THREE.Geometry();
+  lineGeometry.vertices.push(mesh.position, target);
+
+  var line = new THREE.Line(lineGeometry, lineMaterial);
+  this.scene.add(line);
+
+  var tween = new TWEEN.Tween(mesh.position)
+    .to(target, tt)
+    .easing(TWEEN.Easing.Linear.None)
+    .onComplete(function () {
+      this.updateFleets();
+      this.scene.remove(mesh);
+      this.scene.remove(line);
+
+      dest.text.innerHTML = this.getLabels(dest);
+    }.bind(this))
+    .start();
+
+  this.scene.add(mesh);
+  console.log('ship')
+
+  return mesh;
+};
 
 Scene.prototype.sendFleet = function (origin, dest, ships){
 
@@ -268,13 +429,19 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   // Substract the ships to be sent
   origin.ships -= ships;
 
+  // Generate tiny 3d ships
+  var meshes = [];
+  for(var i = 0; i < ships; i++)
+    meshes.push(this.createShip(origin, dest));
+
   // Add the fleet to the fleets array
   this._fleets.push({
     origin: origin,
     dest: dest,
     owner: origin.owner,
     ships: ships,
-    start: new Date()
+    start: new Date(),
+    meshes: meshes
   });
 
   return true;
