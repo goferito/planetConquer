@@ -92,12 +92,6 @@ var Scene = function(conquerors,
     }),
   ];
 
-  this.textMaterial = new THREE.MeshBasicMaterial({
-    color: 0x000000,
-    depthWrite: false,
-    depthTest: false
-  });
-
   this.renderer = new THREE.WebGLRenderer({
     antialias: true,
     alpha: true,
@@ -106,7 +100,7 @@ var Scene = function(conquerors,
 
   this._planets.forEach(function (planet) {
     planet.mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(12, 32, 32), 
+      new THREE.SphereGeometry(16, 32, 32), 
       this.planetMaterials[
         Math.floor((Math.random() * this.planetMaterials.length))
       ]
@@ -130,7 +124,7 @@ var Scene = function(conquerors,
   }.bind(this));
 
   this.renderer.setSize(window.innerWidth, window.innerHeight);
-  this.renderer.setClearColor(0xeeeeee);
+  this.renderer.setClearColor(0x000000);
   this.animate();
   
   document.body.appendChild(this.renderer.domElement);
