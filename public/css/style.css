@@ -1,10 +1,19 @@
-canvas {
-  border: 1px solid #808080;
+#battlefieldContainer {
   display: block;
   margin: auto;
 }
-#battlefieldContainer {
-  border: 1px solid #808080;
-  display: block;
-  margin: auto;
+.planetLabel {
+  font-family: courier;
+  position: absolute;
+  display: inline;
+/* background-color rgba(255, 255, 255, 0.5)  */
+  width: 50px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-size: 10px;
+  color: #fff;
+}
+body {
+  margin: 0;
 }

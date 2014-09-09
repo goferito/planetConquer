@@ -32,15 +32,70 @@ var Scene = function(conquerors,
   );
 
   this.camera.position.z = 500;
+  this.camera.updateMatrixWorld();
 
-  var light01 = new THREE.DirectionalLight(0xffffff, 0.7);
+  var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
   light01.position.set(1, 1, 1);
   this.scene.add(light01);
 
+  var light02 = new THREE.DirectionalLight(0xffffff, 0.9);
+  light02.position.set(-1, -1, 1);
+  // this.scene.add(light02);
+
+  this.scene.add(new THREE.AmbientLight(0x555555));
+  this.projector = new THREE.Projector();
+
   this.planetMaterial = new THREE.MeshPhongMaterial({
     color: 0xff4444,
-    wireframe: false,
-    shininess: 50
+    shininess: 50,
+    depthWrite: false,
+    depthTest: false
+  });
+
+  this.planetMaterials = [
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/earthmap1k.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/jupitermap.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/mars_1k_color.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/mercurymap.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/neptunemap.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/plutomap1k.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/saturnmap.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/venusmap.jpg'),
+      bump: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
+      shininess: 50,
+    }),
+  ];
+
+  this.textMaterial = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    depthWrite: false,
+    depthTest: false
   });
 
   this.renderer = new THREE.WebGLRenderer({
@@ -51,15 +106,27 @@ var Scene = function(conquerors,
 
   this._planets.forEach(function (planet) {
     planet.mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(8, 32, 32), 
-      this.planetMaterial
+      new THREE.SphereGeometry(12, 32, 32), 
+      this.planetMaterials[
+        Math.floor((Math.random() * this.planetMaterials.length))
+      ]
     );
 
     planet.mesh.position.x = planet.x;
     planet.mesh.position.y = planet.y;
-    console.log(planet)
 
     this.scene.add(planet.mesh);
+
+    var pos2d = this.toXYCoords(planet.mesh.position);
+
+    var text = document.createElement('div');
+    text.className = 'planetLabel';
+    text.innerHTML = planet.ships;
+    text.style.top = parseInt(pos2d.y - 10) + 'px';
+    text.style.left = parseInt(pos2d.x - 25) + 'px';
+    document.body.appendChild(text);
+
+    planet.text = text;
   }.bind(this));
 
   this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,6 +136,12 @@ var Scene = function(conquerors,
   document.body.appendChild(this.renderer.domElement);
 };
 
+Scene.prototype.toXYCoords = function (pos) {
+  var vector = this.projector.projectVector(pos.clone(), this.camera);
+  vector.x = (vector.x + 1)/2 * window.innerWidth;
+  vector.y = -(vector.y - 1)/2 * window.innerHeight;
+  return vector;
+};
 
 Scene.prototype.generatePlanets = function(conquerors,
                                            conquerorsRatio,
@@ -118,6 +191,7 @@ Scene.prototype.growRatios = function(){
   for(var i in this._planets){
     var p = this._planets[i];
     p.ships += p.ratio;
+    p.text.innerHTML = p.ships;
   }
 };
 
@@ -268,6 +342,9 @@ Scene.prototype.startDrawing = function(){
 };
 
 Scene.prototype.render = function (dt) {
+  this._planets.forEach(function (p) {
+    p.mesh.rotation.y += 0.2 * dt;
+  });
   this.renderer.render(this.scene, this.camera);
 };
 
