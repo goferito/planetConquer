@@ -11,8 +11,8 @@ var conquerors_config = {
   conquerors: [
 
     { name: 'Saa',  color: 'blue',  ai: culoVeo },
-    { name: 'Adam', color: 'red',   ai: culoVeo },
-    { name: 'Tilo', color: 'green', ai: culoVeo },
+    { name: 'Adam', color: 'red',   ai: lazyReporter },
+    { name: 'Tilo', color: 'green', ai: lazyReporter },
     { name: 'Ray',  color: 'pink',  ai: lazyReporter }
 
   ],

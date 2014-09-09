@@ -2,7 +2,7 @@
 function init(){
 
   // Players can send ships every two seconds
-  var turnTime = 2000;
+  var turnTime = 5000;
 
   // var canvas = document.getElementById('battlefield');
   // var context = canvas.getContext('2d');

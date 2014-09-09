@@ -407,39 +407,35 @@ Scene.prototype.startDrawing = function(){
 };
 
 Scene.prototype.render = function (dt) {
-  this._planets.forEach(function (p) {
-    p.mesh.rotation.y += 0.15 * dt;
-  });
-
   // Current time, to check how far the fleets have already gone
-  var t = new Date();
+  // var t = new Date();
 
-  this._fleets.forEach(function (fleet, i) {
-    var dist = getDistance(fleet.origin, fleet.dest)
-
-      // Trip time
-      , tt = dist / this._speed
-
-      // Elapsed time
-      , elapsed = t - fleet.start
-
-      // Percent travelled
-      , pTravelled = elapsed / tt
-
-      // console.log(pTravelled);
-    fleet.meshes.forEach(function (mesh) {
-      var pos = new THREE.Vector3()
-        .copy(fleet.dest.mesh.position)
-        .sub(fleet.origin.mesh.position)
-        .multiplyScalar(pTravelled)
-        .add(fleet.origin.mesh.position);
-
-      mesh.position.set(pos.x, pos.y, pos.z);
-    });
-
-    // If already there, remove
-    if(pTravelled >= 1) this.scene.remove(fleet.meshes);
-  }.bind(this));
+  // this._fleets.forEach(function (fleet, i) {
+  //   var dist = getDistance(fleet.origin, fleet.dest)
+  //
+  //     // Trip time
+  //     , tt = dist / this._speed
+  //
+  //     // Elapsed time
+  //     , elapsed = t - fleet.start
+  //
+  //     // Percent travelled
+  //     , pTravelled = Math.min(2, elapsed / tt)
+  //
+  //   // If already there, remove
+  //   if(pTravelled >= 1) this.scene.remove.apply(this.scene, fleet.meshes);
+  //
+  //     // console.log(pTravelled);
+  //   fleet.meshes.forEach(function (mesh, i) {
+  //     var pos = new THREE.Vector3()
+  //       .copy(fleet.dest.mesh.position)
+  //       .sub(fleet.origin.mesh.position)
+  //       .multiplyScalar(pTravelled)
+  //       .add(fleet.origin.mesh.position);
+  //
+  //     mesh.position.set(pos.x, pos.y, pos.z);
+  //   });
+  // }.bind(this));
 
   this.cameraCube.rotation.copy(this.camera.rotation);
   this.cameraCube.position.copy(this.camera.position);
@@ -453,7 +449,15 @@ Scene.prototype.render = function (dt) {
 
 Scene.prototype.animate = function () {
   requestAnimationFrame(this.animate.bind(this));
-  this.render(this.clock.getDelta());
+  var dt = this.clock.getDelta();
+
+  TWEEN.update();
+
+  this._planets.forEach(function (p) {
+    p.mesh.rotation.y += 0.15 * dt;
+  });
+
+  this.render(dt);
 };
 
 
@@ -508,16 +512,29 @@ Scene.prototype.updateFleets = function(){
 
 };
 
-Scene.prototype.createShip = function (origin) {
-  var box = new THREE.BoxGeometry(1, 1, 1);
+Scene.prototype.createShip = function (origin, dest) {
+  var box = new THREE.BoxGeometry(1, 1, 5);
   var material = new THREE.MeshPhongMaterial({color: 0xaa0000, shininess: 90});
   var mesh = new THREE.Mesh(box, material);
 
   mesh.position.copy(origin.mesh.position);
-  mesh.position.x += Math.random() * 5 - 5;
-  mesh.position.y += Math.random() * 5 - 5;
+  mesh.position.x += Math.random() * 8 - 4; 
+  mesh.position.y += Math.random() * 8 - 4;
   mesh.position.z = 20;
-  console.log(mesh.position);
+
+  var target = dest.mesh.position.clone();
+  target.x += Math.random() * 12 - 6; 
+  target.y += Math.random() * 12 - 6;
+
+  mesh.lookAt(target);
+
+  var tween = new TWEEN.Tween(mesh.position)
+    .to(target, 5000)
+    .easing(TWEEN.Easing.Linear.None)
+    .onComplete(function () {
+      this.scene.remove(mesh);
+    }.bind(this))
+    .start();
 
   this.scene.add(mesh);
   console.log('ship')
@@ -533,10 +550,10 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   // Substract the ships to be sent
   origin.ships -= ships;
 
-  // generate tiny 3d ships
+  // Generate tiny 3d ships
   var meshes = [];
   for(var i = 0; i < ships; i++)
-    meshes.push(this.createShip(origin));
+    meshes.push(this.createShip(origin, dest));
 
   // Add the fleet to the fleets array
   this._fleets.push({

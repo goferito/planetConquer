@@ -83,6 +83,7 @@ var culoVeo = function(){
         _this.sendFleet(myPlanet, planet, planet.ships + 1);
       }
       
+      return;
     });
 
   });
@@ -96,6 +97,6 @@ var culoVeo = function(){
  */
 var lazyReporter = function(){
   console.log('I\'m ' + this.name + ', reporting planets situation:');
-  console.log(this.getPlanets());
+  // console.log(this.getPlanets());
 };
 
