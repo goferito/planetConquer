@@ -1,7 +1,6 @@
 
 var Scene = function(conquerors,
-                     initialShips,
-                     context, container){
+                     initialShips){
 
   this._numConquerors = conquerors.length;
   this._conquerors = conquerors.reduce(function(conqs, c){
@@ -10,7 +9,6 @@ var Scene = function(conquerors,
   }, {});
   this._initialShips = initialShips;
   this._initialPlanetRatio = 5;
-  this._context = context;
   this._planets = this.generatePlanets(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
@@ -18,7 +16,6 @@ var Scene = function(conquerors,
   this._speed = 0.05;
   this._drawingInterval = 100;
 
-  this.container = container;
   this.initRenderer();
 };
 
@@ -172,8 +169,9 @@ Scene.prototype.initRenderer = function () {
   });
 
   this._planets.forEach(function (planet) {
+    var radius = Math.random() * 15 + 10;
     planet.mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(16, 32, 32), 
+      new THREE.SphereGeometry(radius, 32, 32), 
       this.planetMaterials[
         Math.floor((Math.random() * this.planetMaterials.length))
       ]
@@ -181,6 +179,7 @@ Scene.prototype.initRenderer = function () {
 
     planet.mesh.position.x = planet.x;
     planet.mesh.position.y = planet.y;
+    // planet.mesh.position.z = Math.random() * 400 - 200;
 
     this.scene.add(planet.mesh);
 
@@ -268,7 +267,6 @@ Scene.prototype.getLabels = function (planet) {
   return labels;
 };
 
-
 /**
  * Returns the planets array
  */
@@ -277,7 +275,6 @@ Scene.prototype.getPlanets = function(){
   return this._planets;
 };
 
-
 /**
  * Returns the fleets array
  */
@@ -285,7 +282,6 @@ Scene.prototype.getFleets = function(){
   this.updateFleets();
   return this._fleets;
 };
-  
 
 /**
  * Return the color established for the given conqueror
@@ -300,151 +296,10 @@ Scene.prototype.getConquerorColor = function(conqId){
 };
 
 /**
- * Draws the scene into a canvas context
- * @param <context> ctx - The canvas context
- * @returns <Scene> 
+ * Renders the 3d scene with Three.js
+ * @param <float> dt - elapsed time since last frame
  */
-Scene.prototype.drawScene = function(ctx){
-
-  var _this = this;
-
-  this._planets.forEach(function(planet){
-
-    // Draw coloured circle
-    ctx.globalAlpha = 1;
-    ctx.shadowColor = '#999';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.beginPath();
-    ctx.arc(planet.x,
-            planet.y,
-            planet.ratio * 5 + 10,
-            0,
-            2 * Math.PI,
-            false);
-    ctx.fillStyle = _this.getConquerorColor(planet.owner);
-    ctx.fill();
-
-    // Draw number of contained ships
-    ctx.fillStyle = 'white'
-    ctx.fillText(planet.ships,
-                 planet.x - 6,
-                 planet.y + 4);
-
-  });
-
-  // Current time, to check how far the fleets have already gone
-  var t = new Date();
-
-  // Draw travelling fleets
-  this._fleets.forEach(function(fleet, i){
-    
-    // Calculate fleet position
-    var dist = getDistance(fleet.origin, fleet.dest)
-
-      // Trip time
-      , tt = dist / _this._speed
-
-      // Elapsed time
-      , elapsed = t - fleet.start
-
-      // Percent travelled
-      , pTravelled = elapsed / tt
-
-      // X trip distance
-      , dx = fleet.dest.x - fleet.origin.x
-
-      // Current X
-      , cx = fleet.origin.x + dx * pTravelled
-
-      // Y trip distance
-      , dy = fleet.dest.y - fleet.origin.y
-
-      // Current X
-      , cy = fleet.origin.y + dy * pTravelled
-
-
-    // If already there, don't draw
-    if(pTravelled >= 1) return;
-
-    // Draw coloured circle
-    ctx.globalAlpha = 0.5;
-    ctx.shadowColor = '#999';
-    ctx.shadowBlur = 3;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
-    ctx.beginPath();
-    ctx.arc(cx,
-            cy,
-            3 + fleet.ships, // radio
-            0,
-            2 * Math.PI,
-            false);
-    ctx.fillStyle = _this.getConquerorColor(fleet.owner);
-    ctx.fill();
-
-    // Draw fleet route
-    ctx.globalAlpha = 0.3;
-    ctx.shadowBlur = 1;
-    ctx.shadowOffsetX = 3;
-    ctx.shadowOffsetY = 3;
-    ctx.beginPath();
-    ctx.moveTo(fleet.origin.x, fleet.origin.y);
-    ctx.lineTo(fleet.dest.x, fleet.dest.y);
-    ctx.stroke();
-    
-    // Draw number of contained ships
-    ctx.globalAlpha = 0.8;
-    ctx.fillStyle = 'white'
-    ctx.fillText(fleet.ships, cx - 2, cy + 3);
-
-  });
-}
-
-Scene.prototype.startDrawing = function(){
-  var _this = this;
-  setInterval(function(){
-    _this._context.clearRect(0,
-                            0,
-                            _this._context.canvas.offsetWidth,
-                            _this._context.canvas.offsetHeight);
-    _this.updateFleets();
-    _this.drawScene(_this._context);
-  }, this._drawingInterval);
-};
-
 Scene.prototype.render = function (dt) {
-  // Current time, to check how far the fleets have already gone
-  // var t = new Date();
-
-  // this._fleets.forEach(function (fleet, i) {
-  //   var dist = getDistance(fleet.origin, fleet.dest)
-  //
-  //     // Trip time
-  //     , tt = dist / this._speed
-  //
-  //     // Elapsed time
-  //     , elapsed = t - fleet.start
-  //
-  //     // Percent travelled
-  //     , pTravelled = Math.min(2, elapsed / tt)
-  //
-  //   // If already there, remove
-  //   if(pTravelled >= 1) this.scene.remove.apply(this.scene, fleet.meshes);
-  //
-  //     // console.log(pTravelled);
-  //   fleet.meshes.forEach(function (mesh, i) {
-  //     var pos = new THREE.Vector3()
-  //       .copy(fleet.dest.mesh.position)
-  //       .sub(fleet.origin.mesh.position)
-  //       .multiplyScalar(pTravelled)
-  //       .add(fleet.origin.mesh.position);
-  //
-  //     mesh.position.set(pos.x, pos.y, pos.z);
-  //   });
-  // }.bind(this));
-
   this.cameraCube.rotation.copy(this.camera.rotation);
   this.cameraCube.position.copy(this.camera.position);
 
@@ -467,7 +322,6 @@ Scene.prototype.animate = function () {
 
   this.render(dt);
 };
-
 
 /**
  * Removes the fleets that have already got to their destination
@@ -523,14 +377,14 @@ Scene.prototype.updateFleets = function(){
 Scene.prototype.createShip = function (origin, dest) {
   var color = this.getConquerorColor(origin.owner);
 
-  var box = new THREE.BoxGeometry(1, 1, 5);
+  var box = new THREE.BoxGeometry(0.7, 0.7, 5);
   var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
   var mesh = new THREE.Mesh(box, material);
 
   mesh.position.copy(origin.mesh.position);
   mesh.position.x += Math.random() * 8 - 4; 
   mesh.position.y += Math.random() * 8 - 4;
-  mesh.position.z = 20;
+  // mesh.position.z = 20;
 
   var target = dest.mesh.position.clone();
   target.x += Math.random() * 12 - 6; 
