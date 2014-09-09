@@ -411,6 +411,35 @@ Scene.prototype.render = function (dt) {
     p.mesh.rotation.y += 0.15 * dt;
   });
 
+  // Current time, to check how far the fleets have already gone
+  var t = new Date();
+
+  this._fleets.forEach(function (fleet, i) {
+    var dist = getDistance(fleet.origin, fleet.dest)
+
+      // Trip time
+      , tt = dist / this._speed
+
+      // Elapsed time
+      , elapsed = t - fleet.start
+
+      // Percent travelled
+      , pTravelled = elapsed / tt
+
+      // console.log(pTravelled);
+    fleet.meshes.forEach(function (mesh) {
+      var pos = new THREE.Vector3()
+        .copy(fleet.dest.mesh.position)
+        .sub(fleet.origin.mesh.position)
+        .multiplyScalar(pTravelled)
+        .add(fleet.origin.mesh.position);
+
+      mesh.position.set(pos.x, pos.y, pos.z);
+    });
+
+    // If already there, remove
+    if(pTravelled >= 1) this.scene.remove(fleet.meshes);
+  }.bind(this));
 
   this.cameraCube.rotation.copy(this.camera.rotation);
   this.cameraCube.position.copy(this.camera.position);
@@ -504,6 +533,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   // Substract the ships to be sent
   origin.ships -= ships;
 
+  // generate tiny 3d ships
   var meshes = [];
   for(var i = 0; i < ships; i++)
     meshes.push(this.createShip(origin));
@@ -514,7 +544,8 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
     dest: dest,
     owner: origin.owner,
     ships: ships,
-    start: new Date()
+    start: new Date(),
+    meshes: meshes
   });
 
   return true;
