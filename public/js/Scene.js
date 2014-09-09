@@ -241,13 +241,21 @@ Scene.prototype.generatePlanets = function(conquerors,
   return map;
 };
 
-
-Scene.prototype.growRatios = function(){
+Scene.prototype.updateLabels = function () {
   for(var i in this._planets){
     var p = this._planets[i];
     p.ships += p.ratio;
     p.text.innerHTML = this.getLabels(p);
   }
+};
+
+Scene.prototype.growRatios = function(){
+  for(var i in this._planets){
+    var p = this._planets[i];
+    p.ships += p.ratio;
+  }
+
+  this.updateLabels();
 };
 
 Scene.prototype.getLabels = function (planet) {
@@ -513,8 +521,10 @@ Scene.prototype.updateFleets = function(){
 };
 
 Scene.prototype.createShip = function (origin, dest) {
+  var color = this.getConquerorColor(origin.owner);
+
   var box = new THREE.BoxGeometry(1, 1, 5);
-  var material = new THREE.MeshPhongMaterial({color: 0xaa0000, shininess: 90});
+  var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
   var mesh = new THREE.Mesh(box, material);
 
   mesh.position.copy(origin.mesh.position);
@@ -528,14 +538,30 @@ Scene.prototype.createShip = function (origin, dest) {
 
   mesh.lookAt(target);
 
-  var dist = getDistance(origin, dest);
+  var dist = mesh.position.distanceTo(target);
   var tt = dist / this._speed;
+
+  var lineMaterial = new THREE.LineBasicMaterial({
+    color: color,
+    transparent: true,
+    opacity: 0.5
+  });
+
+  var lineGeometry = new THREE.Geometry();
+  lineGeometry.vertices.push(mesh.position, target);
+
+  var line = new THREE.Line(lineGeometry, lineMaterial);
+  this.scene.add(line);
 
   var tween = new TWEEN.Tween(mesh.position)
     .to(target, tt)
     .easing(TWEEN.Easing.Linear.None)
     .onComplete(function () {
+      this.updateFleets();
       this.scene.remove(mesh);
+      this.scene.remove(line);
+
+      dest.text.innerHTML = this.getLabels(dest);
     }.bind(this))
     .start();
 
