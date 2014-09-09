@@ -186,9 +186,9 @@ var Scene = function(conquerors,
 
     var text = document.createElement('div');
     text.className = 'planetLabel';
-    text.innerHTML = planet.ships;
-    text.style.top = parseInt(pos2d.y - 10) + 'px';
-    text.style.left = parseInt(pos2d.x - 25) + 'px';
+    text.innerHTML = this.getLabels(planet);
+    text.style.top = parseInt(pos2d.y) + 'px';
+    text.style.left = parseInt(pos2d.x) + 'px';
     document.body.appendChild(text);
 
     planet.text = text;
@@ -244,8 +244,18 @@ Scene.prototype.growRatios = function(){
   for(var i in this._planets){
     var p = this._planets[i];
     p.ships += p.ratio;
-    p.text.innerHTML = p.ships;
+    p.text.innerHTML = this.getLabels(p);
   }
+};
+
+Scene.prototype.getLabels = function (planet) {
+  var labels = '';
+  labels += '<label class="ships">' + planet.ships + '</label>';
+
+  if(planet.owner)
+    labels += '<label class="owner">' + planet.owner + '</label>';
+
+  return labels;
 };
 
 
