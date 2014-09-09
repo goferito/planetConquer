@@ -90,6 +90,58 @@ var Scene = function(conquerors,
       bump: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
       shininess: 50,
     }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/Planet_Avalon_1600.jpg'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Dank1200.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.png'),
+      shininess: 50,
+    }),
+    new THREE.MeshPhongMaterial({
+      map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.png'),
+      shininess: 50,
+    }),
   ];
 
   this.renderer = new THREE.WebGLRenderer({
