@@ -22,6 +22,7 @@ var Scene = function(conquerors,
 
   this.container = container;
   this.scene = new THREE.Scene();
+  this.sceneCube = new THREE.Scene();
   this.clock = new THREE.Clock();
 
   this.camera = new THREE.PerspectiveCamera(
@@ -33,6 +34,7 @@ var Scene = function(conquerors,
 
   this.camera.position.z = 500;
   this.camera.updateMatrixWorld();
+  this.cameraCube = this.camera.clone();
 
   var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
   light01.position.set(1, 1, 1);
@@ -45,12 +47,29 @@ var Scene = function(conquerors,
   this.scene.add(new THREE.AmbientLight(0x555555));
   this.projector = new THREE.Projector();
 
-  this.planetMaterial = new THREE.MeshPhongMaterial({
-    color: 0xff4444,
-    shininess: 50,
-    depthWrite: false,
-    depthTest: false
+  var urls = [
+    'px.jpg', 'nx.jpg',
+    'py.jpg', 'ny.jpg',
+    'pz.jpg', 'nz.jpg'
+  ].map(function(e) {
+    return 'assets/env/' + e;
   });
+
+  this.environmentMap = THREE.ImageUtils.loadTextureCube(urls);
+
+  var shader = THREE.ShaderLib['cube'];
+  shader.uniforms['tCube'].value = this.environmentMap;
+
+  var material = new THREE.ShaderMaterial({
+    fragmentShader: shader.fragmentShader,
+    vertexShader: shader.vertexShader,
+    uniforms: shader.uniforms,
+    depthWrite: false,
+    side: THREE.BackSide
+  });
+
+  var skyBox = new THREE.Mesh(new THREE.BoxGeometry(1200, 1200, 1200), material);
+  this.sceneCube.add(skyBox);
 
   this.planetMaterials = [
     new THREE.MeshPhongMaterial({
@@ -205,18 +224,6 @@ Scene.prototype.generatePlanets = function(conquerors,
       { x: -200, y: 100, ratio: 5, ships: 3 },
     ]
   ];
-  // var maps =  [
-  //   [
-  //     { x: 100, y: 100, ratio: 5, ships: 3 },
-  //     { x: 400, y: 150, ratio: 5, ships: 25 },
-  //     { x: 600, y: 300, ratio: 5, ships: 45 },
-  //     { x: 50,  y: 200, ratio: 1, ships: 1 },
-  //     { x: 100, y: 300, ratio: 2, ships: 10 },
-  //     { x: 200, y: 150, ratio: 3, ships: 200 },
-  //     { x: 300, y: 150, ratio: 4, ships: 1 },
-  //     { x: 400, y: 250, ratio: 5, ships: 3 },
-  //   ]
-  // ];
 
   //TODO test this
   var mapPos = Math.floor(Math.random() * maps.length)
@@ -391,6 +398,15 @@ Scene.prototype.render = function (dt) {
   this._planets.forEach(function (p) {
     p.mesh.rotation.y += 0.2 * dt;
   });
+
+
+  this.cameraCube.rotation.copy(this.camera.rotation);
+  this.cameraCube.position.copy(this.camera.position);
+
+  this.renderer.autoClear = false;
+  this.renderer.clear();
+
+  this.renderer.render(this.sceneCube, this.cameraCube);
   this.renderer.render(this.scene, this.camera);
 };
 
