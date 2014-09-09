@@ -18,9 +18,11 @@ var Scene = function(conquerors,
   this._speed = 0.05;
   this._drawingInterval = 100;
 
-  // 3d 
-
   this.container = container;
+  this.initRenderer();
+};
+
+Scene.prototype.initRenderer = function () {
   this.scene = new THREE.Scene();
   this.sceneCube = new THREE.Scene();
   this.clock = new THREE.Clock();
@@ -406,7 +408,7 @@ Scene.prototype.startDrawing = function(){
 
 Scene.prototype.render = function (dt) {
   this._planets.forEach(function (p) {
-    p.mesh.rotation.y += 0.2 * dt;
+    p.mesh.rotation.y += 0.15 * dt;
   });
 
 
@@ -477,6 +479,22 @@ Scene.prototype.updateFleets = function(){
 
 };
 
+Scene.prototype.createShip = function (origin) {
+  var box = new THREE.BoxGeometry(1, 1, 1);
+  var material = new THREE.MeshPhongMaterial({color: 0xaa0000, shininess: 90});
+  var mesh = new THREE.Mesh(box, material);
+
+  mesh.position.copy(origin.mesh.position);
+  mesh.position.x += Math.random() * 5 - 5;
+  mesh.position.y += Math.random() * 5 - 5;
+  mesh.position.z = 20;
+  console.log(mesh.position);
+
+  this.scene.add(mesh);
+  console.log('ship')
+
+  return mesh;
+};
 
 Scene.prototype.sendFleet = function (origin, dest, ships){
 
@@ -485,6 +503,10 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
 
   // Substract the ships to be sent
   origin.ships -= ships;
+
+  var meshes = [];
+  for(var i = 0; i < ships; i++)
+    meshes.push(this.createShip(origin));
 
   // Add the fleet to the fleets array
   this._fleets.push({
