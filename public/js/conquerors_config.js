@@ -10,13 +10,14 @@ var conquerors_config = {
 
   conquerors: [
 
-    { name: 'Saa',  color: 'blue',  ai: culoVeo },
-    { name: 'Adam', color: 'red',   ai: culoVeo },
-    { name: 'Tilo', color: 'green', ai: culoVeo },
-    { name: 'Ray',  color: 'pink',  ai: lazyReporter }
+    { name: 'Ramin',  color: 'blue',   ai: culoVeo },
+    { name: 'Vlad',   color: 'red',    ai: culoVeo },
+    { name: 'Ray',    color: 'green',  ai: culoVeo },
+    { name: 'Adam',   color: 'yellow', ai: culoVeo },
+    { name: 'Shivan', color: 'pink',   ai: culoVeo }
 
   ],
 
-  conquerorsInitialShips: 30
+  conquerorsInitialShips: 50
 
 };

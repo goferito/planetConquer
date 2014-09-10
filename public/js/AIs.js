@@ -99,3 +99,8 @@ var lazyReporter = function(){
   console.log(this.getPlanets());
 };
 
+
+var saaAI = function(){
+  //Atacar el mas cercano conquistable
+  
+};

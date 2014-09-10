@@ -60,3 +60,5 @@ Player.prototype.sendFleet = function(origin, dest, ships){
   
 };
 
+
+module.exports = Player;

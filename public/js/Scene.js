@@ -1,94 +1,17 @@
 
-var Scene = function(conquerors,
-                     initialShips,
-                     context){
+var Scene = function(planets,
+                     fleets,
+                     ctx){
+  //TODO planets and fleet are not needed to initialize, just
+  //     the context. Planets and fleets are updated on every
+  //     tick
+  this._planets = planets;
+  this._fleets = fleets;
+  this._context = ctx;
 
-  this._numConquerors = conquerors.length;
-  this._conquerors = conquerors.reduce(function(conqs, c){
-    conqs[c.name] = c;
-    return conqs;
-  }, {});
-  this._initialShips = initialShips;
-  this._initialPlanetRatio = 5;
-  this._context = context;
-  this._planets = this.generatePlanets(conquerors,
-                                       this._initialPlanetRatio,
-                                       this._initialShips);
-  this._fleets = [];
-  this._speed = 0.05;
   this._drawingInterval = 100;
+  this._speed = 0.1;
 
-};
-
-
-Scene.prototype.generatePlanets = function(conquerors,
-                                           conquerorsRatio,
-                                           conquerorsShips){
-  //TODO create more maps
-  var maps =  [
-    [
-      { x: 100, y: 100, ratio: 5, ships: 3 },
-      { x: 400, y: 150, ratio: 5, ships: 25 },
-      { x: 600, y: 300, ratio: 5, ships: 45 },
-      { x: 50,  y: 200, ratio: 1, ships: 1 },
-      { x: 100, y: 300, ratio: 2, ships: 10 },
-      { x: 200, y: 150, ratio: 3, ships: 200 },
-      { x: 300, y: 150, ratio: 4, ships: 1 },
-      { x: 400, y: 250, ratio: 5, ships: 3 },
-    ]
-  ];
-
-  //TODO test this
-  var mapPos = Math.floor(Math.random() * maps.length)
-    , map = maps[mapPos]
-
-  //Put the players in the first planets
-  conquerors.forEach(function(conq, i){
-    map[i].owner = conq.name;
-    map[i].ratio = conquerorsRatio;
-    map[i].ships = conquerorsShips;
-  });
-
-  return map;
-};
-
-
-Scene.prototype.growRatios = function(){
-  for(var i in this._planets){
-    var p = this._planets[i];
-    p.ships += p.ratio;
-  }
-};
-
-
-/**
- * Returns the planets array
- */
-Scene.prototype.getPlanets = function(){
-  this.updateFleets();
-  return this._planets;
-};
-
-
-/**
- * Returns the fleets array
- */
-Scene.prototype.getFleets = function(){
-  this.updateFleets();
-  return this._fleets;
-};
-  
-
-/**
- * Return the color established for the given conqueror
- *
- * @param <String> conqId - Id of the requested conqueror
- * @return <String> color
- */
-Scene.prototype.getConquerorColor = function(conqId){
-  return !conqId
-           ? 'gray'
-           : this._conquerors[conqId].color || 'gray';
 };
 
 
@@ -140,7 +63,7 @@ Scene.prototype.drawScene = function(ctx){
       , tt = dist / _this._speed
 
       // Elapsed time
-      , elapsed = t - fleet.start
+      , elapsed = t - new Date(fleet.start)
 
       // Percent travelled
       , pTravelled = elapsed / tt
@@ -193,15 +116,16 @@ Scene.prototype.drawScene = function(ctx){
     ctx.fillText(fleet.ships, cx - 2, cy + 3);
 
   });
-}
+};
+
 
 Scene.prototype.startDrawing = function(){
   var _this = this;
   setInterval(function(){
     _this._context.clearRect(0,
-                            0,
-                            _this._context.canvas.offsetWidth,
-                            _this._context.canvas.offsetHeight);
+                             0,
+                             _this._context.canvas.offsetWidth,
+                             _this._context.canvas.offsetHeight);
     _this.updateFleets();
     _this.drawScene(_this._context);
   }, this._drawingInterval);
@@ -225,7 +149,7 @@ Scene.prototype.updateFleets = function(){
         , tt = dist / this._speed
 
         // Elapsed time
-        , elapsed = t - fleet.start
+        , elapsed = t - new Date(fleet.start)
 
         // Percent travelled
         , pTravelled = elapsed / tt;
@@ -260,25 +184,17 @@ Scene.prototype.updateFleets = function(){
 };
 
 
-Scene.prototype.sendFleet = function (origin, dest, ships){
 
-  // Check it's not trying to send more ships than the available
-  if(origin.ships < ships) return false;
-
-  // Substract the ships to be sent
-  origin.ships -= ships;
-
-  // Add the fleet to the fleets array
-  this._fleets.push({
-    origin: origin,
-    dest: dest,
-    owner: origin.owner,
-    ships: ships,
-    start: new Date()
-  });
-
-  return true;
-
+/**
+ * Return the color established for the given conqueror
+ *
+ * @param <String> conqId - Id of the requested conqueror
+ * @return <String> color
+ */
+Scene.prototype.getConquerorColor = function(conqId){
+  return !conqId
+           ? 'gray'
+           : this._conquerors[conqId].color || 'gray';
 };
 
 
@@ -292,5 +208,3 @@ function getDistance(origin, dest){
   return Math.sqrt(  Math.pow(origin.x - dest.x, 2)
                    + Math.pow(origin.y - dest.y, 2));
 }
-
-
