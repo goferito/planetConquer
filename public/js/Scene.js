@@ -209,6 +209,24 @@ Scene.prototype.initRenderer = function () {
 
   document.body.appendChild(this.renderer.domElement);
   window.addEventListener('resize', this.onWindowResize.bind(this), false);
+
+  // generate space garbage
+
+  var material = new THREE.MeshPhongMaterial({color: 0x666666, shininess: 50});
+  var box = new THREE.BoxGeometry(1, 1, 1);
+
+  for(var i = 0; i < 600; i++) {
+    var mesh = new THREE.Mesh(box, material);
+
+    mesh.scale.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
+    mesh.position.x += Math.random() * 1200 - 600;
+    mesh.position.z += Math.random() * 1200 - 600;
+    mesh.position.y += Math.random() * 100 - 50;
+    mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    // mesh.position.z = 20;
+
+    this.scene.add(mesh);
+  }
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -452,7 +470,6 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     .easing(TWEEN.Easing.Linear.None)
     .interpolation(TWEEN.Interpolation.Bezier)
     .onUpdate(function (t) {
-      // mesh.rotation.copy(spline.getTangent(t));
       mesh.position.copy(spline.getPoint(t));
       mesh.lookAt(spline.getPoint(t+0.001));
     })
