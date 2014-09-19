@@ -13,8 +13,7 @@ var Scene = function(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
   this._fleets = [];
-  this._speed = 0.01;
-  this._drawingInterval = 100;
+  this._speed = 0.02;
 
   this.initRenderer();
 };
@@ -479,7 +478,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   origin.ships -= ships;
 
   // Generate tiny 3d ships
-  var maxY = Math.random() * 60 + 20;
+  var maxY = Math.random() * 60 + 30;
   var meshes = [];
   for(var i = 0; i < ships; i++)
     meshes.push(this.createShip(origin, dest, maxY));
