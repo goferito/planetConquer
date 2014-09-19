@@ -193,6 +193,7 @@ Scene.prototype.initRenderer = function () {
     // planet.mesh.position.y = radius;
     // planet.mesh.position.z = Math.random() * 400 - 200;
     planet.mesh.radius = radius;
+    planet.mesh.sphere = new THREE.Sphere(planet.mesh.position, radius);
 
     this.scene.add(planet.mesh);
 
@@ -429,6 +430,31 @@ Scene.prototype.updateFleets = function(){
 
 };
 
+/**
+ * Returns the intersections with other planets
+ */
+Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
+  var ray = new THREE.Ray(origin.mesh.position, dest.mesh.position.clone().sub(origin.mesh.position).normalize());
+  var intersections = [];
+
+  this._planets.forEach(function (planet) {
+    if(planet == origin || planet == dest) return;
+
+    if(planet.mesh.position.distanceTo(origin.mesh.position) > maxDistance)
+      return;
+
+    if(ray.isIntersectionSphere(planet.mesh.sphere)) {
+      intersections.push({
+        position: planet.mesh.position,
+        radius: planet.mesh.radius,
+        direction: ray.direction
+      });
+    }
+  });
+
+  return intersections;
+};
+
 Scene.prototype.createShip = function (origin, dest, maxY) {
   var color = this.getConquerorColor(origin.owner);
 
@@ -457,44 +483,38 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     opacity: 0.15
   });
 
+  var splineTargets = [];
+
   var startPosition = mesh.position.clone();
   startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
   startPosition.x += dh;
   startPosition.y += dh;
   startPosition.z += dh;
 
-  var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
+  splineTargets.push(startPosition);
 
-  // move away from nearest planet
-  var nearestPlanetPosition = null;
-  var nearestDistance = Infinity;
-  this._planets.forEach(function(p) {
-    if(p == dest || p == origin) return;
-    if(!nearestPlanetPosition) {
-      nearestPlanetPosition = p.mesh.position;
-      nearestDistance = halfWayPosition.distanceTo(nearestPlanetPosition);
-      return;
-    }
-    if(halfWayPosition.distanceTo(p) < nearestDistance) {
-      nearestPlanet = p.mesh.position;
-      nearestDistance = halfWayPosition.distanceTo(nearestPlanetPosition);
-    }
+  var intersections = this.intersectPlanets(origin, dest, dist);
+  intersections.forEach(function (intersect) {
+    var pos = intersect.position.clone();
+    pos.x += dh;
+    pos.y += dh / 4 + ((maxY > 0 ? intersect.radius : -intersect.radius) * 1.5);
+    pos.z += dh;
+    splineTargets.push(pos);
   });
-  console.log(nearestDistance)
 
-  if(nearestDistance < dist) {
-    var vToNearestPlanet = halfWayPosition.clone().sub(nearestPlanetPosition);
-    halfWayPosition.add(vToNearestPlanet.multiplyScalar(nearestDistance / 500));
+  if(intersections.length == 0) {
+    var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
+
+    halfWayPosition.x += dh;
+    halfWayPosition.y += dh / 4 + maxY;
+    halfWayPosition.z += dh;
+
+    splineTargets.push(halfWayPosition);
   }
-  halfWayPosition.x += dh / 2;
-  halfWayPosition.y = maxY;
-  halfWayPosition.z += dh / 2;
 
-  var spline = new THREE.SplineCurve3([
-    startPosition,
-    halfWayPosition,
-    target
-  ]);
+  splineTargets.push(target);
+
+  var spline = new THREE.SplineCurve3(splineTargets);
 
   var geometry = new THREE.Geometry();
   var splinePoints = spline.getPoints(32);
