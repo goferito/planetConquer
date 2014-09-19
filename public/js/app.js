@@ -2,7 +2,7 @@
 function init(){
 
   // Players can send ships every two seconds
-  var turnTime = 3000;
+  var turnTime = 2000;
 
   var myScene = new Scene(conquerors_config.conquerors,
                           conquerors_config.conquerorsInitialShips);

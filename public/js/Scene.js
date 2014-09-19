@@ -30,8 +30,8 @@ Scene.prototype.initRenderer = function () {
     15000
   );
 
-  this.camera.position.y = 300;
-  this.camera.position.z = 450;
+  this.camera.position.y = 500;
+  this.camera.position.z = 850;
   this.camera.lookAt(new THREE.Vector3(0,0,0));
   this.camera.updateMatrixWorld();
   this.cameraCube = this.camera.clone();
@@ -178,6 +178,13 @@ Scene.prototype.initRenderer = function () {
     preserveDrawingBuffer: true
   });
 
+  this.renderer.setSize(window.innerWidth, window.innerHeight);
+  this.renderer.setClearColor(0x000000);
+
+  document.body.appendChild(this.renderer.domElement);
+
+  this.render();
+
   var randomizePlanetMaterials = Math.round(Math.random() * this.planetMaterials.length);
   this._planets.forEach(function (planet, i) {
     var radius = planet.ratio * 5;
@@ -220,11 +227,8 @@ Scene.prototype.initRenderer = function () {
     document.body.appendChild(labels);
   }.bind(this));
 
-  this.renderer.setSize(window.innerWidth, window.innerHeight);
-  this.renderer.setClearColor(0x000000);
   this.animate();
 
-  document.body.appendChild(this.renderer.domElement);
   window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
   // generate space garbage
@@ -232,15 +236,15 @@ Scene.prototype.initRenderer = function () {
   var material = new THREE.MeshPhongMaterial({color: 0x666666, shininess: 50});
   var box = new THREE.BoxGeometry(1, 1, 1);
 
-  for(var i = 0; i < 600; i++) {
+  for(var i = 0; i < 800; i++) {
     var mesh = new THREE.Mesh(box, material);
 
     mesh.scale.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
     mesh.position.x += Math.random() * 1200 - 600;
     mesh.position.z += Math.random() * 1200 - 600;
-    mesh.position.y += Math.random() * 100 - 50;
+    mesh.position.y += Math.random() * 150 - 75;
+
     mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-    // mesh.position.z = 20;
 
     this.scene.add(mesh);
   }
@@ -278,13 +282,13 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: -20, y: -200, ratio: 2, ships: 10 },
-      { x: -80, y: 255, ratio: 2, ships: 10 },
+      { x: -20, y: -300, ratio: 2, ships: 10 },
+      { x: -80, y: 250, ratio: 2, ships: 10 },
       { x: -400, y: -260, ratio: 2, ships: 10 },
       { x: 400,  y: 220, ratio: 2, ships: 10 },
       { x: 100, y: 80, ratio: 2, ships: 10 },
       { x: 180, y: -110, ratio: 2, ships: 10 },
-      { x: -280, y: -190, ratio: 2, ships: 10 },
+      { x: -420, y: 390, ratio: 4, ships: 10 },
       { x: -200, y: 100, ratio: 2, ships: 10 },
     ]
   ];
@@ -312,7 +316,7 @@ Scene.prototype.updateLabels = function (planet) {
     planet.labels.owner.style.visibility = 'visible';
 
     var color = new THREE.Color(this.getConquerorColor(planet.owner));
-    var bg = 'rgba(' + color.r*255 + ', ' + color.g*255 + ', ' + color.b*255 + ', 0.35)';
+    var bg = 'rgba(' + color.r * 255 + ', ' + color.g * 255 + ', ' + color.b * 255 + ', 0.35)';
     planet.labels.owner.style.backgroundColor = bg;
   }
 };
@@ -375,7 +379,8 @@ Scene.prototype.animate = function () {
   TWEEN.update();
 
   this._planets.forEach(function (p) {
-    p.mesh.rotation.y += 0.15 * dt;
+    if(p.mesh)
+      p.mesh.rotation.y += 0.15 * dt;
   });
 
   this.render(dt);
