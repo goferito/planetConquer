@@ -30,8 +30,6 @@ Scene.prototype.initRenderer = function () {
         15000
   );
 
-  // this.scene.fog = new THREE.FogExp2( 0x000000, 0.0019 );
-
   this.camera.position.z = 300;
   this.camera.position.y = 400;
   this.camera.lookAt(new THREE.Vector3(0,0,0));
@@ -50,13 +48,13 @@ Scene.prototype.initRenderer = function () {
   light02.position.set(-1, -1, 1);
   // this.scene.add(light02);
 
-  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
-      hemiLight.color.setHSL(0.6, 1, 0.6);
-      hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-      hemiLight.position.set(0, 500, 0);
+  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
+  hemiLight.color.setHSL(0.6, 1, 0.6);
+  hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+  hemiLight.position.set(0, 500, 0);
   this.scene.add(hemiLight);
 
-  this.scene.add(new THREE.AmbientLight(0x333333));
+  // this.scene.add(new THREE.AmbientLight(0x333333));
   this.projector = new THREE.Projector();
 
   var urls = [
@@ -86,7 +84,7 @@ Scene.prototype.initRenderer = function () {
   this.planetMaterials = [
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/earthmap1k.jpg'),
-      bump: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
@@ -95,12 +93,12 @@ Scene.prototype.initRenderer = function () {
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/mars_1k_color.jpg'),
-      bump: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/mercurymap.jpg'),
-      bump: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
@@ -109,7 +107,7 @@ Scene.prototype.initRenderer = function () {
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/plutomap1k.jpg'),
-      bump: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
@@ -118,7 +116,7 @@ Scene.prototype.initRenderer = function () {
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/venusmap.jpg'),
-      bump: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
       shininess: 50,
     }),
     new THREE.MeshPhongMaterial({
@@ -478,7 +476,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   origin.ships -= ships;
 
   // Generate tiny 3d ships
-  var maxY = Math.random() * 60 + 30;
+  var maxY = Math.random() * 50 - 50;
   var meshes = [];
   for(var i = 0; i < ships; i++)
     meshes.push(this.createShip(origin, dest, maxY));
