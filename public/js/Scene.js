@@ -81,91 +81,92 @@ Scene.prototype.initRenderer = function () {
   var skyBox = new THREE.Mesh(new THREE.BoxGeometry(5200, 5200, 5200), material);
   this.sceneCube.add(skyBox);
 
+  var planetShininess = 40;
   this.planetMaterials = [
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/earthmap1k.jpg'),
       bumpMap: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/jupitermap.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/mars_1k_color.jpg'),
       bumpMap: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/mercurymap.jpg'),
       bumpMap: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/neptunemap.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/plutomap1k.jpg'),
       bumpMap: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/saturnmap.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/venusmap.jpg'),
       bumpMap: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/Planet_Avalon_1600.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
       map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.jpg'),
-      shininess: 50,
+      shininess: planetShininess,
     }),
   ];
 
