@@ -10,17 +10,16 @@ function init(){
   var players = conquerors_config.conquerors.map(function(c){
     return new Player(c.name, c.color, c.ai, myScene);
   });
-  
+
   setInterval(function(){
     // Each player sends the fleets they want to
     players.forEach(function(player){
       player.ai();
     });
+
     myScene.growRatios();
-    
   }, turnTime)
 }
-
 
 window.onload = init;
 

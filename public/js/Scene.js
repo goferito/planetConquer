@@ -13,7 +13,7 @@ var Scene = function(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
   this._fleets = [];
-  this._speed = 0.05;
+  this._speed = 0.01;
   this._drawingInterval = 100;
 
   this.initRenderer();
@@ -28,7 +28,7 @@ Scene.prototype.initRenderer = function () {
         45,
         window.innerWidth / window.innerHeight,
         1,
-        5000
+        15000
   );
 
   // this.scene.fog = new THREE.FogExp2( 0x000000, 0.0019 );
@@ -81,7 +81,7 @@ Scene.prototype.initRenderer = function () {
     side: THREE.BackSide
   });
 
-  var skyBox = new THREE.Mesh(new THREE.BoxGeometry(1200, 1200, 1200), material);
+  var skyBox = new THREE.Mesh(new THREE.BoxGeometry(5200, 5200, 5200), material);
   this.sceneCube.add(skyBox);
 
   this.planetMaterials = [
@@ -189,6 +189,7 @@ Scene.prototype.initRenderer = function () {
 
     planet.mesh.position.x = planet.x;
     planet.mesh.position.z = planet.y;
+    // planet.mesh.position.y = radius;
     // planet.mesh.position.z = Math.random() * 400 - 200;
 
     this.scene.add(planet.mesh);
@@ -210,6 +211,7 @@ Scene.prototype.initRenderer = function () {
   this.animate();
 
   document.body.appendChild(this.renderer.domElement);
+  window.addEventListener('resize', this.onWindowResize.bind(this), false);
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -226,6 +228,16 @@ Scene.prototype.updateLabelPositions = function () {
     planet.text.style.top = parseInt(pos2d.y) + 'px';
     planet.text.style.left = parseInt(pos2d.x) + 'px';
   }.bind(this));
+};
+
+Scene.prototype.onWindowResize = function () {
+  this.camera.aspect = window.innerWidth / window.innerHeight;
+  this.camera.updateProjectionMatrix();
+  this.cameraCube.aspect = this.camera.aspect;
+  this.cameraCube.updateProjectionMatrix();
+
+  this.renderer.setSize(window.innerWidth, window.innerHeight);
+  this.updateLabelPositions();
 };
 
 Scene.prototype.generatePlanets = function(conquerors,
@@ -363,7 +375,7 @@ Scene.prototype.updateFleets = function(){
 
         // Percent travelled
         , pTravelled = elapsed / tt;
-      
+
 
       // If travelled 100% percent of the trip
       if(elapsed >= tt){
@@ -386,14 +398,14 @@ Scene.prototype.updateFleets = function(){
 
         // Remove fleet from fleets list
         this._fleets.splice(i, 1);
-        
+
       }
 
     }
 
 };
 
-Scene.prototype.createShip = function (origin, dest) {
+Scene.prototype.createShip = function (origin, dest, maxY) {
   var color = this.getConquerorColor(origin.owner);
 
   var box = new THREE.BoxGeometry(0.7, 0.7, 5);
@@ -401,15 +413,13 @@ Scene.prototype.createShip = function (origin, dest) {
   var mesh = new THREE.Mesh(box, material);
 
   mesh.position.copy(origin.mesh.position);
-  mesh.position.x += Math.random() * 8 - 4; 
+  mesh.position.x += Math.random() * 8 - 4;
   mesh.position.y += Math.random() * 8 - 4;
   // mesh.position.z = 20;
 
   var target = dest.mesh.position.clone();
-  target.x += Math.random() * 12 - 6; 
-  target.y += Math.random() * 12 - 6;
-
-  mesh.lookAt(target);
+  target.x += Math.random() * 12 - 6;
+  target.z += Math.random() * 12 - 6;
 
   var dist = mesh.position.distanceTo(target);
   var tt = dist / this._speed;
@@ -417,18 +427,34 @@ Scene.prototype.createShip = function (origin, dest) {
   var lineMaterial = new THREE.LineBasicMaterial({
     color: color,
     transparent: true,
-    opacity: 0.5
+    opacity: 0.3
   });
 
-  var lineGeometry = new THREE.Geometry();
-  lineGeometry.vertices.push(mesh.position, target);
+  var spline = new THREE.SplineCurve3([
+    origin.mesh.position.clone(),
+    new THREE.Vector3(target.x / 2, target.y / 2 + maxY, target.z / 2),
+    target
+  ]);
 
-  var line = new THREE.Line(lineGeometry, lineMaterial);
+  var geometry = new THREE.Geometry();
+  var splinePoints = spline.getPoints(32);
+
+  for(var i = 0; i < splinePoints.length; i++)
+    geometry.vertices.push(splinePoints[i]);
+
+  var line = new THREE.Line(geometry, lineMaterial);
+
   this.scene.add(line);
 
-  var tween = new TWEEN.Tween(mesh.position)
+  var tween = new TWEEN.Tween(mesh.position.clone())
     .to(target, tt)
     .easing(TWEEN.Easing.Linear.None)
+    .interpolation(TWEEN.Interpolation.Bezier)
+    .onUpdate(function (t) {
+      // mesh.rotation.copy(spline.getTangent(t));
+      mesh.position.copy(spline.getPoint(t));
+      mesh.lookAt(spline.getPoint(t+0.001));
+    })
     .onComplete(function () {
       this.updateFleets();
       this.scene.remove(mesh);
@@ -453,9 +479,10 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   origin.ships -= ships;
 
   // Generate tiny 3d ships
+  var maxY = Math.random() * 60 + 20;
   var meshes = [];
   for(var i = 0; i < ships; i++)
-    meshes.push(this.createShip(origin, dest));
+    meshes.push(this.createShip(origin, dest, maxY));
 
   // Add the fleet to the fleets array
   this._fleets.push({
