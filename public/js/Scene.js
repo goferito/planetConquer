@@ -435,13 +435,12 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   var mesh = new THREE.Mesh(box, material);
 
   mesh.position.copy(origin.mesh.position);
-  mesh.position.x += Math.random() * 8 - 4;
-  mesh.position.y += Math.random() * 8 - 4;
-  // mesh.position.z = 20;
+
+  var dh = Math.random() * 6 - 3;
 
   var target = dest.mesh.position.clone();
-  target.x += Math.random() * 12 - 6;
-  target.z += Math.random() * 12 - 6;
+  target.x += dh;
+  target.z += dh;
 
   var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
   var direction = directLine.clone().normalize();
@@ -456,10 +455,16 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     opacity: 0.3
   });
 
-  var startPosition = origin.mesh.position.clone();
+  var startPosition = mesh.position.clone();
   startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
+  startPosition.x += dh;
+  startPosition.y += dh;
+  startPosition.z += dh;
+
   var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
+  halfWayPosition.x += dh / 2;
   halfWayPosition.y = maxY;
+  halfWayPosition.z += dh / 2;
 
   var spline = new THREE.SplineCurve3([
     startPosition,
