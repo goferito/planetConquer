@@ -199,14 +199,25 @@ Scene.prototype.initRenderer = function () {
 
     var pos2d = this.toXYCoords(planet.mesh.position);
 
-    var text = document.createElement('div');
-    text.className = 'planetLabel';
-    text.innerHTML = this.getLabels(planet);
-    text.style.top = parseInt(pos2d.y) + 'px';
-    text.style.left = parseInt(pos2d.x) + 'px';
-    document.body.appendChild(text);
+    var labels = document.createElement('div');
+    labels.className = 'planetLabel';
+    labels.style.top = parseInt(pos2d.y) + 'px';
+    labels.style.left = parseInt(pos2d.x) + 'px';
 
-    planet.text = text;
+    var shipsLabel = document.createElement('label');
+    shipsLabel.className = 'ships';
+    labels.ships = shipsLabel;
+    labels.appendChild(shipsLabel);
+
+    var ownerLabels = document.createElement('label');
+    ownerLabels.className = 'owner';
+    labels.owner = ownerLabels;
+    labels.appendChild(ownerLabels);
+
+    planet.labels = labels;
+
+    this.updateLabels(planet);
+    document.body.appendChild(labels);
   }.bind(this));
 
   this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -246,8 +257,8 @@ Scene.prototype.updateLabelPositions = function () {
   this._planets.forEach(function (planet) {
     var pos2d = this.toXYCoords(planet.mesh.position);
 
-    planet.text.style.top = parseInt(pos2d.y) + 'px';
-    planet.text.style.left = parseInt(pos2d.x) + 'px';
+    planet.labels.style.top = parseInt(pos2d.y) + 'px';
+    planet.labels.style.left = parseInt(pos2d.x) + 'px';
   }.bind(this));
 };
 
@@ -292,11 +303,17 @@ Scene.prototype.generatePlanets = function(conquerors,
   return map;
 };
 
-Scene.prototype.updateLabels = function () {
-  for(var i in this._planets){
-    var p = this._planets[i];
-    p.ships += p.ratio;
-    p.text.innerHTML = this.getLabels(p);
+Scene.prototype.updateLabels = function (planet) {
+  planet.labels.ships.innerText = planet.ships;
+  if(!planet.owner) {
+    planet.labels.owner.style.visibility = 'hidden';
+  } else {
+    planet.labels.owner.innerText = planet.owner;
+    planet.labels.owner.style.visibility = 'visible';
+
+    var color = new THREE.Color(this.getConquerorColor(planet.owner));
+    var bg = 'rgba(' + color.r*255 + ', ' + color.g*255 + ', ' + color.b*255 + ', 0.35)';
+    planet.labels.owner.style.backgroundColor = bg;
   }
 };
 
@@ -304,23 +321,8 @@ Scene.prototype.growRatios = function(){
   for(var i in this._planets){
     var p = this._planets[i];
     p.ships += p.ratio;
+    this.updateLabels(p);
   }
-
-  this.updateLabels();
-};
-
-Scene.prototype.getLabels = function (planet) {
-  var labels = '';
-  labels += '<label class="ships">' + planet.ships + '</label>';
-
-  if(planet.owner) {
-    var color = new THREE.Color(this.getConquerorColor(planet.owner));
-    var colorCss = 'background-color: rgba(' + color.r*255 + ', ' + color.g*255 + ', ' + color.b*255 + ', 0.35);';
-
-    labels += '<label class="owner" style="' + colorCss + '">' + planet.owner + '</label>';
-  }
-
-  return labels;
 };
 
 /**
@@ -541,7 +543,8 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
       this.scene.remove(mesh);
       this.scene.remove(line);
 
-      dest.text.innerHTML = this.getLabels(dest);
+      // dest.text.innerHTML = this.getLabels(dest);
+      this.updateLabels(dest);
     }.bind(this))
     .start();
 
