@@ -24,10 +24,10 @@ Scene.prototype.initRenderer = function () {
   this.clock = new THREE.Clock();
 
   this.camera = new THREE.PerspectiveCamera(
-        45,
-        window.innerWidth / window.innerHeight,
-        1,
-        15000
+    45,
+    window.innerWidth / window.innerHeight,
+    1,
+    15000
   );
 
   this.camera.position.y = 300;
@@ -454,7 +454,7 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   var lineMaterial = new THREE.LineBasicMaterial({
     color: color,
     transparent: true,
-    opacity: 0.3
+    opacity: 0.15
   });
 
   var startPosition = mesh.position.clone();
@@ -464,6 +464,28 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   startPosition.z += dh;
 
   var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
+
+  // move away from nearest planet
+  var nearestPlanetPosition = null;
+  var nearestDistance = Infinity;
+  this._planets.forEach(function(p) {
+    if(p == dest || p == origin) return;
+    if(!nearestPlanetPosition) {
+      nearestPlanetPosition = p.mesh.position;
+      nearestDistance = halfWayPosition.distanceTo(nearestPlanetPosition);
+      return;
+    }
+    if(halfWayPosition.distanceTo(p) < nearestDistance) {
+      nearestPlanet = p.mesh.position;
+      nearestDistance = halfWayPosition.distanceTo(nearestPlanetPosition);
+    }
+  });
+  console.log(nearestDistance)
+
+  if(nearestDistance < dist) {
+    var vToNearestPlanet = halfWayPosition.clone().sub(nearestPlanetPosition);
+    halfWayPosition.add(vToNearestPlanet.multiplyScalar(nearestDistance / 500));
+  }
   halfWayPosition.x += dh / 2;
   halfWayPosition.y = maxY;
   halfWayPosition.z += dh / 2;
