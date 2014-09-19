@@ -25,9 +25,9 @@ Scene.prototype.initRenderer = function () {
   this.clock = new THREE.Clock();
 
   this.camera = new THREE.PerspectiveCamera(
-        45, 
-        window.innerWidth / window.innerHeight, 
-        1, 
+        45,
+        window.innerWidth / window.innerHeight,
+        1,
         5000
   );
 
@@ -165,9 +165,9 @@ Scene.prototype.initRenderer = function () {
   });
 
   this._planets.forEach(function (planet) {
-    var radius = Math.random() * 15 + 10;
+    var radius = planet.ratio * 5;
     planet.mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(radius, 32, 32), 
+      new THREE.SphereGeometry(radius, 32, 32),
       this.planetMaterials[
         Math.floor((Math.random() * this.planetMaterials.length))
       ]
