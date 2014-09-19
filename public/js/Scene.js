@@ -31,9 +31,17 @@ Scene.prototype.initRenderer = function () {
         5000
   );
 
-  this.camera.position.z = 500;
+  // this.scene.fog = new THREE.FogExp2( 0x000000, 0.0019 );
+
+  this.camera.position.z = 300;
+  this.camera.position.y = 400;
+  this.camera.lookAt(new THREE.Vector3(0,0,0));
   this.camera.updateMatrixWorld();
   this.cameraCube = this.camera.clone();
+
+  this.controls = new THREE.OrbitControls(this.camera);
+  this.controls.damping = 0.2;
+  this.controls.addEventListener('change', this.updateLabelPositions.bind(this));
 
   var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
   light01.position.set(1, 1, 1);
@@ -43,7 +51,13 @@ Scene.prototype.initRenderer = function () {
   light02.position.set(-1, -1, 1);
   // this.scene.add(light02);
 
-  this.scene.add(new THREE.AmbientLight(0x555555));
+  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
+      hemiLight.color.setHSL(0.6, 1, 0.6);
+      hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+      hemiLight.position.set(0, 500, 0);
+  this.scene.add(hemiLight);
+
+  this.scene.add(new THREE.AmbientLight(0x333333));
   this.projector = new THREE.Projector();
 
   var urls = [
@@ -174,7 +188,7 @@ Scene.prototype.initRenderer = function () {
     );
 
     planet.mesh.position.x = planet.x;
-    planet.mesh.position.y = planet.y;
+    planet.mesh.position.z = planet.y;
     // planet.mesh.position.z = Math.random() * 400 - 200;
 
     this.scene.add(planet.mesh);
@@ -194,7 +208,7 @@ Scene.prototype.initRenderer = function () {
   this.renderer.setSize(window.innerWidth, window.innerHeight);
   this.renderer.setClearColor(0x000000);
   this.animate();
-  
+
   document.body.appendChild(this.renderer.domElement);
 };
 
@@ -203,6 +217,15 @@ Scene.prototype.toXYCoords = function (pos) {
   vector.x = (vector.x + 1)/2 * window.innerWidth;
   vector.y = -(vector.y - 1)/2 * window.innerHeight;
   return vector;
+};
+
+Scene.prototype.updateLabelPositions = function () {
+  this._planets.forEach(function (planet) {
+    var pos2d = this.toXYCoords(planet.mesh.position);
+
+    planet.text.style.top = parseInt(pos2d.y) + 'px';
+    planet.text.style.left = parseInt(pos2d.x) + 'px';
+  }.bind(this));
 };
 
 Scene.prototype.generatePlanets = function(conquerors,
