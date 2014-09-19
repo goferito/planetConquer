@@ -245,13 +245,13 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: -10, y: -10, ratio: 5, ships: 3 },
-      { x: -80, y: 15, ratio: 5, ships: 25 },
-      { x: -120, y: -60, ratio: 5, ships: 45 },
-      { x: 10,  y: 120, ratio: 1, ships: 1 },
+      { x: -20, y: -20, ratio: 5, ships: 3 },
+      { x: -80, y: 155, ratio: 5, ships: 25 },
+      { x: -100, y: -160, ratio: 5, ships: 45 },
+      { x: 100,  y: 220, ratio: 1, ships: 1 },
       { x: 100, y: 80, ratio: 2, ships: 10 },
       { x: 180, y: -110, ratio: 3, ships: 200 },
-      { x: -200, y: -150, ratio: 4, ships: 1 },
+      { x: -280, y: -190, ratio: 4, ships: 1 },
       { x: -200, y: 100, ratio: 5, ships: 3 },
     ]
   ];
