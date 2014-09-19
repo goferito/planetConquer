@@ -13,7 +13,7 @@ var Scene = function(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
   this._fleets = [];
-  this._speed = 0.02;
+  this._speed = 0.05;
 
   this.initRenderer();
 };
@@ -221,7 +221,7 @@ Scene.prototype.initRenderer = function () {
   var material = new THREE.MeshPhongMaterial({color: 0x666666, shininess: 50});
   var box = new THREE.BoxGeometry(1, 1, 1);
 
-  for(var i = 0; i < 800; i++) {
+  for(var i = 0; i < 600; i++) {
     var mesh = new THREE.Mesh(box, material);
 
     mesh.scale.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
@@ -267,14 +267,14 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: -20, y: -200, ratio: 5, ships: 3 },
-      { x: -80, y: 255, ratio: 5, ships: 25 },
-      { x: -400, y: -260, ratio: 5, ships: 45 },
-      { x: 400,  y: 220, ratio: 1, ships: 1 },
+      { x: -20, y: -200, ratio: 2, ships: 10 },
+      { x: -80, y: 255, ratio: 2, ships: 10 },
+      { x: -400, y: -260, ratio: 2, ships: 10 },
+      { x: 400,  y: 220, ratio: 2, ships: 10 },
       { x: 100, y: 80, ratio: 2, ships: 10 },
-      { x: 180, y: -110, ratio: 3, ships: 100 },
-      { x: -280, y: -190, ratio: 4, ships: 1 },
-      { x: -200, y: 100, ratio: 5, ships: 3 },
+      { x: 180, y: -110, ratio: 2, ships: 10 },
+      { x: -280, y: -190, ratio: 2, ships: 10 },
+      { x: -200, y: 100, ratio: 2, ships: 10 },
     ]
   ];
 
@@ -448,7 +448,7 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
     if(closestPointDistance < planet.mesh.radius) {
       intersections.push({
         position: closestPoint,
-        radius: closestPointDistance,
+        radius: planet.mesh.radius,
         direction: ray.direction
       });
     }
