@@ -290,8 +290,12 @@ Scene.prototype.getLabels = function (planet) {
   var labels = '';
   labels += '<label class="ships">' + planet.ships + '</label>';
 
-  if(planet.owner)
-    labels += '<label class="owner">' + planet.owner + '</label>';
+  if(planet.owner) {
+    var color = new THREE.Color(this.getConquerorColor(planet.owner));
+    var colorCss = 'background-color: rgba(' + color.r*255 + ', ' + color.g*255 + ', ' + color.b*255 + ', 0.35);';
+
+    labels += '<label class="owner" style="' + colorCss + '">' + planet.owner + '</label>';
+  }
 
   return labels;
 };
@@ -463,7 +467,6 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     .start();
 
   this.scene.add(mesh);
-  console.log('ship')
 
   return mesh;
 };
