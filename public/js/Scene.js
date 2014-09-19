@@ -30,14 +30,16 @@ Scene.prototype.initRenderer = function () {
         15000
   );
 
-  this.camera.position.z = 300;
-  this.camera.position.y = 400;
+  this.camera.position.y = 300;
+  this.camera.position.z = 450;
   this.camera.lookAt(new THREE.Vector3(0,0,0));
   this.camera.updateMatrixWorld();
   this.cameraCube = this.camera.clone();
 
   this.controls = new THREE.OrbitControls(this.camera);
   this.controls.damping = 0.2;
+  this.controls.maxDistance = 3500;
+  this.controls.minDistance = 10;
   this.controls.addEventListener('change', this.updateLabelPositions.bind(this));
 
   var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -218,7 +220,7 @@ Scene.prototype.initRenderer = function () {
   var material = new THREE.MeshPhongMaterial({color: 0x666666, shininess: 50});
   var box = new THREE.BoxGeometry(1, 1, 1);
 
-  for(var i = 0; i < 600; i++) {
+  for(var i = 0; i < 800; i++) {
     var mesh = new THREE.Mesh(box, material);
 
     mesh.scale.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
