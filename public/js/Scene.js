@@ -176,13 +176,12 @@ Scene.prototype.initRenderer = function () {
     preserveDrawingBuffer: true
   });
 
-  this._planets.forEach(function (planet) {
+  var randomizePlanetMaterials = Math.round(Math.random() * this.planetMaterials.length);
+  this._planets.forEach(function (planet, i) {
     var radius = planet.ratio * 5;
     planet.mesh = new THREE.Mesh(
       new THREE.SphereGeometry(radius, 32, 32),
-      this.planetMaterials[
-        Math.floor((Math.random() * this.planetMaterials.length))
-      ]
+      this.planetMaterials[(i + randomizePlanetMaterials) % this.planetMaterials.length]
     );
 
     planet.mesh.position.x = planet.x;
