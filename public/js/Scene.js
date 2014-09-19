@@ -267,12 +267,12 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: -20, y: -20, ratio: 5, ships: 3 },
-      { x: -80, y: 155, ratio: 5, ships: 25 },
-      { x: -100, y: -160, ratio: 5, ships: 45 },
-      { x: 100,  y: 220, ratio: 1, ships: 1 },
+      { x: -20, y: -200, ratio: 5, ships: 3 },
+      { x: -80, y: 255, ratio: 5, ships: 25 },
+      { x: -400, y: -260, ratio: 5, ships: 45 },
+      { x: 400,  y: 220, ratio: 1, ships: 1 },
       { x: 100, y: 80, ratio: 2, ships: 10 },
-      { x: 180, y: -110, ratio: 3, ships: 200 },
+      { x: 180, y: -110, ratio: 3, ships: 100 },
       { x: -280, y: -190, ratio: 4, ships: 1 },
       { x: -200, y: 100, ratio: 5, ships: 3 },
     ]
@@ -443,10 +443,12 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
     if(planet.mesh.position.distanceTo(origin.mesh.position) > maxDistance)
       return;
 
-    if(ray.isIntersectionSphere(planet.mesh.sphere)) {
+    var closestPoint = ray.closestPointToPoint(planet.mesh.position);
+    var closestPointDistance = closestPoint.distanceTo(planet.mesh.position);
+    if(closestPointDistance < planet.mesh.radius) {
       intersections.push({
-        position: planet.mesh.position,
-        radius: planet.mesh.radius,
+        position: closestPoint,
+        radius: closestPointDistance,
         direction: ray.direction
       });
     }
@@ -497,7 +499,7 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   intersections.forEach(function (intersect) {
     var pos = intersect.position.clone();
     pos.x += dh;
-    pos.y += dh / 4 + ((maxY > 0 ? intersect.radius : -intersect.radius) * 1.5);
+    pos.y += dh / 4 + ((maxY > 0 ? intersect.radius : -intersect.radius) * 2);
     pos.z += dh;
     splineTargets.push(pos);
   });
