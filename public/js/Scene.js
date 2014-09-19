@@ -179,15 +179,18 @@ Scene.prototype.initRenderer = function () {
   var randomizePlanetMaterials = Math.round(Math.random() * this.planetMaterials.length);
   this._planets.forEach(function (planet, i) {
     var radius = planet.ratio * 5;
+    var material = this.planetMaterials[(i + randomizePlanetMaterials) % this.planetMaterials.length];
+
     planet.mesh = new THREE.Mesh(
       new THREE.SphereGeometry(radius, 32, 32),
-      this.planetMaterials[(i + randomizePlanetMaterials) % this.planetMaterials.length]
+      material
     );
 
     planet.mesh.position.x = planet.x;
     planet.mesh.position.z = planet.y;
     // planet.mesh.position.y = radius;
     // planet.mesh.position.z = Math.random() * 400 - 200;
+    planet.mesh.radius = radius;
 
     this.scene.add(planet.mesh);
 
@@ -440,6 +443,10 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   target.x += Math.random() * 12 - 6;
   target.z += Math.random() * 12 - 6;
 
+  var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
+  var direction = directLine.clone().normalize();
+  target.sub(direction.clone().multiplyScalar(dest.mesh.radius));
+
   var dist = mesh.position.distanceTo(target);
   var tt = dist / this._speed;
 
@@ -449,9 +456,14 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     opacity: 0.3
   });
 
+  var startPosition = origin.mesh.position.clone();
+  startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
+  var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
+  halfWayPosition.y = maxY;
+
   var spline = new THREE.SplineCurve3([
-    origin.mesh.position.clone(),
-    new THREE.Vector3(target.x / 2, target.y / 2 + maxY, target.z / 2),
+    startPosition,
+    halfWayPosition,
     target
   ]);
 
@@ -487,8 +499,7 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   return mesh;
 };
 
-Scene.prototype.sendFleet = function (origin, dest, ships){
-
+Scene.prototype.sendFleet = function (origin, dest, ships) {
   // Check it's not trying to send more ships than the available
   if(origin.ships < ships) return false;
 
@@ -496,7 +507,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   origin.ships -= ships;
 
   // Generate tiny 3d ships
-  var maxY = Math.random() * 50 - 50;
+  var maxY = Math.random() * 100 - 50;
   var meshes = [];
   for(var i = 0; i < ships; i++)
     meshes.push(this.createShip(origin, dest, maxY));
@@ -512,7 +523,6 @@ Scene.prototype.sendFleet = function (origin, dest, ships){
   });
 
   return true;
-
 };
 
 
