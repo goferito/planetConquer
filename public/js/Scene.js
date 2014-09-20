@@ -476,14 +476,16 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   var dh = Math.random() * 6 - 3;
 
   var target = dest.mesh.position.clone();
+
+  var dist = mesh.position.distanceTo(target);
+
   target.x += dh;
   target.z += dh;
 
   var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
   var direction = directLine.clone().normalize();
-  target.sub(direction.clone().multiplyScalar(dest.mesh.radius));
 
-  var dist = mesh.position.distanceTo(target);
+  target.sub(direction.clone().multiplyScalar(dest.mesh.radius));
   var tt = dist / this._speed;
 
   var lineMaterial = new THREE.LineBasicMaterial({
@@ -544,11 +546,10 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
       mesh.lookAt(spline.getPoint(t+0.001));
     })
     .onComplete(function () {
-      this.updateFleets();
       this.scene.remove(mesh);
       this.scene.remove(line);
 
-      // dest.text.innerHTML = this.getLabels(dest);
+      this.updateFleets();
       this.updateLabels(dest);
     }.bind(this))
     .start();
