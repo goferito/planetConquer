@@ -1,4 +1,3 @@
-
 var Scene = function(conquerors,
                      initialShips){
 
@@ -19,6 +18,7 @@ var Scene = function(conquerors,
 };
 
 Scene.prototype.initRenderer = function () {
+  // main scene
   this.scene = new THREE.Scene();
   this.sceneCube = new THREE.Scene();
   this.clock = new THREE.Clock();
@@ -180,6 +180,93 @@ Scene.prototype.initRenderer = function () {
 
   this.renderer.setSize(window.innerWidth, window.innerHeight);
   this.renderer.setClearColor(0x000000);
+  this.renderer.autoClear = false;
+
+  //
+  // occlusion scene
+  //
+
+  this.oclScene = new THREE.Scene();
+  this.oclScene.add(new THREE.AmbientLight(0xffffff));
+  this.vLight = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(33, 3),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    })
+  );
+
+  this.oclCamera = this.camera.clone();
+
+  this.vLight.position.set(0, 100, 0);
+  this.oclScene.add(this.vLight);
+
+  //
+  // OCL Composer
+  //
+
+  var renderTargetParameters = {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    format: THREE.RGBFormat,
+    stencilBufer: false
+  };
+
+  this.oclRenderTarget = new THREE.WebGLRenderTarget(
+    window.innerWidth / 2,
+    window.innerHeight / 2,
+    renderTargetParameters
+  );
+
+  // Prepare the simple blur shader passes
+  var bluriness = 2;
+  hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+  vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
+  hblur.uniforms['h'].value = bluriness / window.innerWidth * 2;
+  vblur.uniforms['v'].value = bluriness / window.innerHeight * 2;
+
+  this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.oclCamera);
+
+  this.godrayPass = new THREE.ShaderPass(THREE.Extras.Shaders.Godrays);
+  this.godrayPass.needsSwap = true;
+  this.godrayPass.renderToScreen = true;
+  this.godrayPass.uniforms = {
+    tDiffuse: {type: "t", value:0, texture:null},
+    fX: {type: "f", value: 0.5},
+    fY: {type: "f", value: 0.5},
+    fExposure: {type: "f", value: 0.6},
+    fDecay: {type: "f", value: 0.93},
+    fDensity: {type: "f", value: 0.96},
+    fWeight: {type: "f", value: 0.4},
+    fClamp: {type: "f", value: 1.0}
+  };
+
+  this.oclComposer = new THREE.EffectComposer(this.renderer, this.oclRenderTarget);
+  this.oclComposer.addPass(this.oclRenderPass);
+  this.oclComposer.addPass(hblur);
+  this.oclComposer.addPass(vblur);
+  this.oclComposer.addPass(hblur);
+  this.oclComposer.addPass(vblur);
+  this.oclComposer.addPass(this.godrayPass);
+
+  //
+  // Final Composer
+  //
+
+  this.mainRenderPass = new THREE.RenderPass(this.scene, this.camera);
+  var finalPass = new THREE.ShaderPass(THREE.Extras.Shaders.Additive);
+  finalPass.uniforms.tAdd.texture = this.oclComposer.renderTarget1;
+  finalPass.needsSwap = true;
+  finalPass.renderToScreen = true;
+
+  this.finalRenderTarget = new THREE.WebGLRenderTarget(
+    window.innerWidth,
+    window.innerHeight,
+    renderTargetParameters
+  );
+
+  this.finalComposer = new THREE.EffectComposer(this.renderer, this.finalRenderTarget);
+  this.finalComposer.addPass(this.mainRenderPass);
+  this.finalComposer.addPass(finalPass);
 
   document.body.appendChild(this.renderer.domElement);
 
@@ -203,6 +290,7 @@ Scene.prototype.initRenderer = function () {
     planet.mesh.sphere = new THREE.Sphere(planet.mesh.position, radius);
 
     this.scene.add(planet.mesh);
+    this.oclScene.add(new THREE.Mesh(planet.mesh.geometry.clone(), new THREE.MeshBasicMaterial({color: 0x000000, map: null})));
 
     var pos2d = this.toXYCoords(planet.mesh.position);
 
@@ -247,7 +335,14 @@ Scene.prototype.initRenderer = function () {
     mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
     this.scene.add(mesh);
+    this.oclScene.add(new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({color: 0x000000, map:null})));
   }
+
+  // setTimeout(function () {
+  //   new TWEEN.Tween(this.vLight.position)
+  //     .to({x: 100, y: 100}, 4000)
+  //     .start();
+  // }.bind(this), 3000);
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -255,6 +350,44 @@ Scene.prototype.toXYCoords = function (pos) {
   vector.x = (vector.x + 1)/2 * window.innerWidth;
   vector.y = -(vector.y - 1)/2 * window.innerHeight;
   return vector;
+};
+
+/**
+ * Renders the 3d scene with Three.js
+ * @param <float> dt - elapsed time since last frame
+ */
+Scene.prototype.render = function (dt) {
+  this.cameraCube.rotation.copy(this.camera.rotation);
+  this.cameraCube.position.copy(this.camera.position);
+
+  this.oclCamera.rotation.copy(this.camera.rotation);
+  this.oclCamera.position.copy(this.camera.position);
+
+  var pos = this.toXYCoords(this.vLight.position);
+  this.godrayPass.uniforms.fX.value = pos.x;
+  this.godrayPass.uniforms.fY.value = pos.y;
+
+  // this.renderer.autoClear = false;
+  // this.renderer.clear();
+  //
+  // this.renderer.render(this.sceneCube, this.cameraCube);
+  // this.renderer.render(this.scene, this.camera);
+  this.oclComposer.render();
+  this.finalComposer.render();
+};
+
+Scene.prototype.animate = function () {
+  requestAnimationFrame(this.animate.bind(this));
+  var dt = this.clock.getDelta();
+
+  TWEEN.update();
+
+  this._planets.forEach(function (p) {
+    if(p.mesh)
+      p.mesh.rotation.y += 0.15 * dt;
+  });
+
+  this.render(dt);
 };
 
 Scene.prototype.updateLabelPositions = function () {
@@ -355,35 +488,6 @@ Scene.prototype.getConquerorColor = function(conqId){
   return !conqId
            ? 'gray'
            : this._conquerors[conqId].color || 'gray';
-};
-
-/**
- * Renders the 3d scene with Three.js
- * @param <float> dt - elapsed time since last frame
- */
-Scene.prototype.render = function (dt) {
-  this.cameraCube.rotation.copy(this.camera.rotation);
-  this.cameraCube.position.copy(this.camera.position);
-
-  this.renderer.autoClear = false;
-  this.renderer.clear();
-
-  this.renderer.render(this.sceneCube, this.cameraCube);
-  this.renderer.render(this.scene, this.camera);
-};
-
-Scene.prototype.animate = function () {
-  requestAnimationFrame(this.animate.bind(this));
-  var dt = this.clock.getDelta();
-
-  TWEEN.update();
-
-  this._planets.forEach(function (p) {
-    if(p.mesh)
-      p.mesh.rotation.y += 0.15 * dt;
-  });
-
-  this.render(dt);
 };
 
 /**
@@ -585,7 +689,6 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
   return true;
 };
 
-
 /**
  * Calculates the distance between two planets
  * @param <Object> origin
@@ -596,5 +699,3 @@ function getDistance(origin, dest){
   return Math.sqrt(  Math.pow(origin.x - dest.x, 2)
                    + Math.pow(origin.y - dest.y, 2));
 }
-
-
