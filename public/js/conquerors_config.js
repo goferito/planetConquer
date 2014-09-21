@@ -12,8 +12,8 @@ var conquerors_config = {
 
     { name: 'Saa',  color: 0x3333ff,  ai: culoVeo },
     { name: 'Adam', color: 0xff3333,   ai: culoVeo },
-    { name: 'Tilo', color: 0x33ff00, ai: lazyReporter },
-    { name: 'Ray',  color: 0xff33ff,  ai: lazyReporter }
+    { name: 'Tilo', color: 0x33ff00, ai: culoVeo },
+    { name: 'Ray',  color: 0xff33ff,  ai: culoVeo }
 
   ],
 
