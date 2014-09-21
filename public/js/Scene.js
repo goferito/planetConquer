@@ -82,6 +82,7 @@ Scene.prototype.initRenderer = function () {
 
   var skyBox = new THREE.Mesh(new THREE.BoxGeometry(5200, 5200, 5200), material);
   this.sceneCube.add(skyBox);
+  this.scene.add(skyBox);
 
   var planetShininess = 40;
   this.planetMaterials = [
@@ -189,7 +190,7 @@ Scene.prototype.initRenderer = function () {
   this.oclScene = new THREE.Scene();
   this.oclScene.add(new THREE.AmbientLight(0xffffff));
   this.vLight = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(33, 3),
+    new THREE.IcosahedronGeometry(80, 3),
     new THREE.MeshBasicMaterial({
       color: 0xffffff
     })
@@ -197,7 +198,7 @@ Scene.prototype.initRenderer = function () {
 
   this.oclCamera = this.camera.clone();
 
-  this.vLight.position.set(0, 100, 0);
+  this.vLight.position.set(0, 0, 0);
   this.oclScene.add(this.vLight);
 
   //
@@ -224,21 +225,27 @@ Scene.prototype.initRenderer = function () {
   hblur.uniforms['h'].value = bluriness / window.innerWidth * 2;
   vblur.uniforms['v'].value = bluriness / window.innerHeight * 2;
 
-  this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.oclCamera);
+  this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.camera);
 
   this.godrayPass = new THREE.ShaderPass(THREE.Extras.Shaders.Godrays);
   this.godrayPass.needsSwap = true;
   this.godrayPass.renderToScreen = true;
-  this.godrayPass.uniforms = {
+
+  this.godrayPass.material.uniforms = {
     tDiffuse: {type: "t", value:0, texture:null},
     fX: {type: "f", value: 0.5},
     fY: {type: "f", value: 0.5},
     fExposure: {type: "f", value: 0.6},
     fDecay: {type: "f", value: 0.93},
     fDensity: {type: "f", value: 0.96},
-    fWeight: {type: "f", value: 0.4},
+    fWeight: {type: "f", value: 0.9},
     fClamp: {type: "f", value: 1.0}
   };
+
+  console.log(this.godrayPass)
+
+  // var copyPass = new THREE.ShaderPass(THREE.CopyShader);
+  // copyPass.renderToScreen = true;
 
   this.oclComposer = new THREE.EffectComposer(this.renderer, this.oclRenderTarget);
   this.oclComposer.addPass(this.oclRenderPass);
@@ -253,14 +260,15 @@ Scene.prototype.initRenderer = function () {
   //
 
   this.mainRenderPass = new THREE.RenderPass(this.scene, this.camera);
+
   var finalPass = new THREE.ShaderPass(THREE.Extras.Shaders.Additive);
-  finalPass.uniforms.tAdd.texture = this.oclComposer.renderTarget1;
+  finalPass.material.uniforms.tAdd.value = this.oclComposer.renderTarget1;
   finalPass.needsSwap = true;
   finalPass.renderToScreen = true;
 
   this.finalRenderTarget = new THREE.WebGLRenderTarget(
-    window.innerWidth,
-    window.innerHeight,
+    this.renderer.domElement.width,
+    this.renderer.domElement.height,
     renderTargetParameters
   );
 
@@ -290,7 +298,10 @@ Scene.prototype.initRenderer = function () {
     planet.mesh.sphere = new THREE.Sphere(planet.mesh.position, radius);
 
     this.scene.add(planet.mesh);
-    this.oclScene.add(new THREE.Mesh(planet.mesh.geometry.clone(), new THREE.MeshBasicMaterial({color: 0x000000, map: null})));
+
+    var oclMesh = new THREE.Mesh(planet.mesh.geometry.clone(), new THREE.MeshBasicMaterial({color: 0x000000}));
+    oclMesh.position.copy(planet.mesh.position);
+    this.oclScene.add(oclMesh);
 
     var pos2d = this.toXYCoords(planet.mesh.position);
 
@@ -335,7 +346,11 @@ Scene.prototype.initRenderer = function () {
     mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
     this.scene.add(mesh);
-    this.oclScene.add(new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({color: 0x000000, map:null})));
+    var oclMesh = new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({color: 0x000000}));
+    oclMesh.position.copy(mesh.position);
+    oclMesh.rotation.copy(mesh.rotation);
+    oclMesh.scale.set(2,2,2);
+    this.oclScene.add(oclMesh);
   }
 
   // setTimeout(function () {
@@ -353,6 +368,16 @@ Scene.prototype.toXYCoords = function (pos) {
 };
 
 /**
+ * Returns position on screen in UV coordinates
+ */
+Scene.prototype.projectOnScreen = function (pos) {
+  var vector = this.projector.projectVector(pos.clone(), this.camera)
+    .multiplyScalar(0.5)
+    .addScalar(0.5);
+  return vector;
+};
+
+/**
  * Renders the 3d scene with Three.js
  * @param <float> dt - elapsed time since last frame
  */
@@ -363,9 +388,9 @@ Scene.prototype.render = function (dt) {
   this.oclCamera.rotation.copy(this.camera.rotation);
   this.oclCamera.position.copy(this.camera.position);
 
-  var pos = this.toXYCoords(this.vLight.position);
-  this.godrayPass.uniforms.fX.value = pos.x;
-  this.godrayPass.uniforms.fY.value = pos.y;
+  var pos = this.projectOnScreen(this.vLight.position);
+  this.godrayPass.material.uniforms.fX.value = pos.x;
+  this.godrayPass.material.uniforms.fY.value = pos.y;
 
   // this.renderer.autoClear = false;
   // this.renderer.clear();

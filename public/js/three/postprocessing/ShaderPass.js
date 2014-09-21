@@ -28,7 +28,6 @@ THREE.ShaderPass = function ( shader, textureID ) {
 
 	this.quad = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2 ), null );
 	this.scene.add( this.quad );
-
 };
 
 THREE.ShaderPass.prototype = {
