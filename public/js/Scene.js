@@ -225,27 +225,24 @@ Scene.prototype.initRenderer = function () {
   hblur.uniforms['h'].value = bluriness / window.innerWidth * 2;
   vblur.uniforms['v'].value = bluriness / window.innerHeight * 2;
 
-  this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.camera);
+  this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.oclCamera);
 
   this.godrayPass = new THREE.ShaderPass(THREE.Extras.Shaders.Godrays);
-  this.godrayPass.needsSwap = true;
-  this.godrayPass.renderToScreen = true;
+  // this.godrayPass.needsSwap = true;
+  // this.godrayPass.renderToScreen = true;
 
-  this.godrayPass.material.uniforms = {
-    tDiffuse: {type: "t", value:0, texture:null},
-    fX: {type: "f", value: 0.5},
-    fY: {type: "f", value: 0.5},
-    fExposure: {type: "f", value: 0.6},
-    fDecay: {type: "f", value: 0.93},
-    fDensity: {type: "f", value: 0.96},
-    fWeight: {type: "f", value: 0.9},
-    fClamp: {type: "f", value: 1.0}
-  };
+  var godrayUniforms = this.godrayPass.material.uniforms;
+  godrayUniforms.fExposure.value = 0.6;
+  godrayUniforms.fDecay.value = 0.93;
+  godrayUniforms.fDensity.value = 0.96;
+  godrayUniforms.fWeight.value = 0.4;
+  godrayUniforms.fClamp.value = 1.0;
 
   console.log(this.godrayPass)
 
-  // var copyPass = new THREE.ShaderPass(THREE.CopyShader);
-  // copyPass.renderToScreen = true;
+  var copyPass = new THREE.ShaderPass(THREE.CopyShader);
+  copyPass.needsSwap = true;
+  copyPass.renderToScreen = true;
 
   this.oclComposer = new THREE.EffectComposer(this.renderer, this.oclRenderTarget);
   this.oclComposer.addPass(this.oclRenderPass);
@@ -254,6 +251,7 @@ Scene.prototype.initRenderer = function () {
   this.oclComposer.addPass(hblur);
   this.oclComposer.addPass(vblur);
   this.oclComposer.addPass(this.godrayPass);
+  this.oclComposer.addPass(copyPass);
 
   //
   // Final Composer
@@ -346,7 +344,7 @@ Scene.prototype.initRenderer = function () {
     mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
     this.scene.add(mesh);
-    var oclMesh = new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({color: 0x000000}));
+    var oclMesh = new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({color: 0xff0000}));
     oclMesh.position.copy(mesh.position);
     oclMesh.rotation.copy(mesh.rotation);
     oclMesh.scale.set(2,2,2);
