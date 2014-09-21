@@ -190,7 +190,7 @@ Scene.prototype.initRenderer = function () {
   this.oclScene = new THREE.Scene();
   this.oclScene.add(new THREE.AmbientLight(0xffffff));
   this.vLight = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(80, 3),
+    new THREE.IcosahedronGeometry(22, 3),
     new THREE.MeshBasicMaterial({
       color: 0xffffff
     })
@@ -232,10 +232,10 @@ Scene.prototype.initRenderer = function () {
   // this.godrayPass.renderToScreen = true;
 
   var godrayUniforms = this.godrayPass.material.uniforms;
-  godrayUniforms.fExposure.value = 0.6;
+  godrayUniforms.fExposure.value = 0.7;
   godrayUniforms.fDecay.value = 0.93;
-  godrayUniforms.fDensity.value = 0.96;
-  godrayUniforms.fWeight.value = 0.4;
+  godrayUniforms.fDensity.value = 0.9;
+  godrayUniforms.fWeight.value = 0.5;
   godrayUniforms.fClamp.value = 1.0;
 
   console.log(this.godrayPass)
