@@ -196,6 +196,8 @@ Scene.prototype.initRenderer = function () {
     })
   );
 
+  this.vLight.radius = 80;
+
   this.oclCamera = this.camera.clone();
 
   this.vLight.position.set(0, 0, 0);
@@ -584,6 +586,18 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
     }
   });
 
+  // interset with the sun
+
+  var closestPoint = ray.closestPointToPoint(this.vLight.position);
+  var closestPointDistance = closestPoint.distanceTo(this.vLight.position);
+  if(closestPointDistance < this.vLight.radius) {
+    intersections.push({
+      position: closestPoint,
+      radius: this.vLight.radius,
+      direction: ray.direction
+    });
+  }
+
   return intersections;
 };
 
@@ -660,6 +674,10 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
 
   this.scene.add(line);
 
+  // ocl mesh
+  // var oclMesh = new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+  // this.oclScene.add(oclMesh);
+  //
   var tween = new TWEEN.Tween(mesh.position.clone())
     .to(target, tt)
     .easing(TWEEN.Easing.Linear.None)
@@ -667,10 +685,14 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     .onUpdate(function (t) {
       mesh.position.copy(spline.getPoint(t));
       mesh.lookAt(spline.getPoint(t+0.001));
+      // oclMesh.position.copy(mesh.position);
+      // oclMesh.rotation.copy(mesh.rotation);
     })
     .onComplete(function () {
       this.scene.remove(mesh);
       this.scene.remove(line);
+
+      // this.oclScene.remove(oclMesh);
 
       this.updateFleets();
       this.updateLabels(dest);
