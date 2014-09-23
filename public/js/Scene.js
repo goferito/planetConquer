@@ -43,21 +43,15 @@ Scene.prototype.initRenderer = function () {
   this.controls.rotateSpeed = 0.3;
   this.controls.addEventListener('change', this.onCameraChange.bind(this));
 
-  var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
-  light01.position.set(1, 1, 1);
+  var light01 = new THREE.PointLight(0xffffff, 1.0);
   this.scene.add(light01);
 
-  var light02 = new THREE.DirectionalLight(0xffffff, 0.9);
-  light02.position.set(-1, -1, 1);
-  // this.scene.add(light02);
-
-  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
+  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
   hemiLight.color.setHSL(0.6, 1, 0.6);
   hemiLight.groundColor.setHSL(0.095, 1, 0.75);
   hemiLight.position.set(0, 500, 0);
   this.scene.add(hemiLight);
 
-  // this.scene.add(new THREE.AmbientLight(0x333333));
   this.projector = new THREE.Projector();
 
   var urls = [
