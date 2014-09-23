@@ -12,7 +12,7 @@ var Scene = function(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
   this._fleets = [];
-  this._speed = 0.05;
+  this._speed = 0.03;
 
   this.initRenderer();
 };
@@ -350,6 +350,14 @@ Scene.prototype.initRenderer = function () {
     this.oclScene.add(oclMesh);
   }
 
+  // awesome ship model
+
+  var loader = new THREE.JSONLoader();
+
+  loader.load('assets/ship/ship.json', function (geometry, materials) {
+    var ship = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    this.shipMesh = ship;
+  }.bind(this));
   // setTimeout(function () {
   //   new TWEEN.Tween(this.vLight.position)
   //     .to({x: 100, y: 100}, 4000)
@@ -609,9 +617,10 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
 Scene.prototype.createShip = function (origin, dest, maxY) {
   var color = this.getConquerorColor(origin.owner);
 
-  var box = new THREE.BoxGeometry(0.7, 0.7, 5);
   var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
-  var mesh = new THREE.Mesh(box, material);
+  var mesh = this.shipMesh.clone();
+  mesh.material.materials[0] = material;
+  mesh.material.materials[1] = material;
 
   mesh.position.copy(origin.mesh.position);
 
