@@ -40,7 +40,8 @@ Scene.prototype.initRenderer = function () {
   this.controls.damping = 0.2;
   this.controls.maxDistance = 3500;
   this.controls.minDistance = 10;
-  this.controls.addEventListener('change', this.updateLabelPositions.bind(this));
+  this.controls.rotateSpeed = 0.3;
+  this.controls.addEventListener('change', this.onCameraChange.bind(this));
 
   var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
   light01.position.set(1, 1, 1);
@@ -384,10 +385,6 @@ Scene.prototype.render = function (dt) {
   this.oclCamera.rotation.copy(this.camera.rotation);
   this.oclCamera.position.copy(this.camera.position);
 
-  var pos = this.projectOnScreen(this.vLight.position);
-  this.godrayPass.material.uniforms.fX.value = pos.x;
-  this.godrayPass.material.uniforms.fY.value = pos.y;
-
   // this.renderer.autoClear = false;
   // this.renderer.clear();
   //
@@ -409,6 +406,14 @@ Scene.prototype.animate = function () {
   });
 
   this.render(dt);
+};
+
+Scene.prototype.onCameraChange = function () {
+  this.updateLabelPositions();
+
+  var pos = this.projectOnScreen(this.vLight.position);
+  this.godrayPass.material.uniforms.fX.value = pos.x;
+  this.godrayPass.material.uniforms.fY.value = pos.y;
 };
 
 Scene.prototype.updateLabelPositions = function () {
