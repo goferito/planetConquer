@@ -606,8 +606,11 @@ Scene.prototype.createShips = function (origin, dest, amount) {
   var ships = new THREE.Object3D();
   var color = this.getConquerorColor(origin.owner);
 
-  var material01 = new THREE.MeshPhongMaterial({color: color, shininess: 50});
-  var material02 = new THREE.MeshPhongMaterial({color: color, shininess: 5});
+  var material = new THREE.MeshFaceMaterial([
+    new THREE.MeshPhongMaterial({color: color, shininess: 50}),
+    new THREE.MeshPhongMaterial({color: color, shininess: 5})
+  ]);
+
   var d = 1.2;
 
   var r = origin.mesh.radius;
@@ -615,8 +618,7 @@ Scene.prototype.createShips = function (origin, dest, amount) {
   for(var i = 0; i < amount; i++) {
     var mesh = this.shipMesh.clone();
 
-    mesh.material.materials[0] = material01;
-    mesh.material.materials[1] = material02;
+    mesh.material = material;
 
     var dx = Math.random() * amount - amount / 2;
     var dy = Math.random() * amount - amount / 2;
