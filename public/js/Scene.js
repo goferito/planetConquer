@@ -607,7 +607,7 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
   return intersections;
 };
 
-Scene.prototype.createShip = function (origin, dest, maxY) {
+Scene.prototype.createShip = function (origin, dest) {
   var color = this.getConquerorColor(origin.owner);
 
   var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
@@ -638,39 +638,7 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
     opacity: 0.15
   });
 
-  var splineTargets = [];
-
-  var startPosition = mesh.position.clone();
-  startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
-  startPosition.x += dh;
-  startPosition.y += dh;
-  startPosition.z += dh;
-
-  splineTargets.push(startPosition);
-
-  var intersections = this.intersectPlanets(origin, dest, dist);
-  intersections.forEach(function (intersect) {
-    var pos = intersect.position.clone();
-    pos.x += dh;
-    pos.y += dh / 4 + ((maxY > 0 ? intersect.radius : -intersect.radius) * 2);
-    pos.z += dh;
-    splineTargets.push(pos);
-  });
-
-  if(intersections.length == 0) {
-    var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
-
-    halfWayPosition.x += dh;
-    halfWayPosition.y += dh / 4 + maxY;
-    halfWayPosition.z += dh;
-
-    splineTargets.push(halfWayPosition);
-  }
-
-  splineTargets.push(target);
-
-  var spline = new THREE.SplineCurve3(splineTargets);
-
+  var spline = this.getFleetSpline(origin, dest);
   var geometry = new THREE.Geometry();
   var splinePoints = spline.getPoints(32);
 
@@ -711,6 +679,45 @@ Scene.prototype.createShip = function (origin, dest, maxY) {
   return mesh;
 };
 
+Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
+  var splineTargets = [];
+  var halfWayOffsetVector = halfWayOffsetVector || new THREE.Vector3(0, 50, 0);
+
+  var intersectionPathDirection = Math.random() > 0.5;
+
+  var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
+  var direction = directLine.clone().normalize();
+
+  var startPosition = origin.mesh.position.clone();
+  startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
+
+  splineTargets.push(startPosition);
+
+  var intersections = this.intersectPlanets(origin, dest, directLine.length());
+  intersections.forEach(function (intersect) {
+    var pos = intersect.position.clone();
+    pos.y += (intersectionPathDirection ? intersect.radius : -intersect.radius) * 2;
+    splineTargets.push(pos);
+  });
+
+  if(intersections.length == 0) {
+    var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
+
+    if(intersectionPathDirection)
+      halfWayPosition.add(halfWayOffsetVector);
+    else
+      halfWayPosition.sub(halfWayOffsetVector);
+
+    splineTargets.push(halfWayPosition);
+  }
+
+  splineTargets.push(dest.mesh.position.clone());
+
+  var spline = new THREE.SplineCurve3(splineTargets);
+
+  return spline;
+};
+
 Scene.prototype.sendFleet = function (origin, dest, ships) {
   // Check it's not trying to send more ships than the available
   if(origin.ships < ships) return false;
@@ -719,10 +726,9 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
   origin.ships -= ships;
 
   // Generate tiny 3d ships
-  var maxY = Math.random() * 100 - 50;
   var meshes = [];
   for(var i = 0; i < ships; i++)
-    meshes.push(this.createShip(origin, dest, maxY));
+    meshes.push(this.createShip(origin, dest));
 
   // Add the fleet to the fleets array
   this._fleets.push({
