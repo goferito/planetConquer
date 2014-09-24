@@ -695,7 +695,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
 
   var spline = this.getFleetSpline(origin, dest);
   var geometry = new THREE.Geometry();
-  var splinePoints = spline.getPoints(32);
+  var splinePoints = spline.getPoints(42);
 
   for(var i = 0; i < splinePoints.length; i++)
     geometry.vertices.push(splinePoints[i]);
