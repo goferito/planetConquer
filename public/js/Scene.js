@@ -184,19 +184,23 @@ Scene.prototype.initRenderer = function () {
 
   this.oclScene = new THREE.Scene();
   this.oclScene.add(new THREE.AmbientLight(0xffffff));
-  this.vLight = new THREE.Mesh(
+  this.sun = new THREE.Mesh(
     new THREE.IcosahedronGeometry(32, 3),
     new THREE.MeshBasicMaterial({
       color: 0xffffff
     })
   );
 
-  this.vLight.radius = 80;
+  this.sun.radius = 80;
 
   this.oclCamera = this.camera.clone();
 
-  this.vLight.position.set(0, 0, 0);
-  this.oclScene.add(this.vLight);
+  this.sun.position.set(0, 0, 0);
+  this.oclScene.add(this.sun);
+
+  var sunScene = this.sun.clone();
+  sunScene.scale.set(1.2, 1.2, 1.2);
+  this.scene.add(sunScene);
 
   //
   // OCL Composer
@@ -353,7 +357,7 @@ Scene.prototype.initRenderer = function () {
     this.shipMesh = ship;
   }.bind(this));
   // setTimeout(function () {
-  //   new TWEEN.Tween(this.vLight.position)
+  //   new TWEEN.Tween(this.sun.position)
   //     .to({x: 100, y: 100}, 4000)
   //     .start();
   // }.bind(this), 3000);
@@ -387,11 +391,6 @@ Scene.prototype.render = function (dt) {
   this.oclCamera.rotation.copy(this.camera.rotation);
   this.oclCamera.position.copy(this.camera.position);
 
-  // this.renderer.autoClear = false;
-  // this.renderer.clear();
-  //
-  // this.renderer.render(this.sceneCube, this.cameraCube);
-  // this.renderer.render(this.scene, this.camera);
   this.oclComposer.render();
   this.finalComposer.render();
 };
@@ -413,7 +412,7 @@ Scene.prototype.animate = function () {
 Scene.prototype.onCameraChange = function () {
   this.updateLabelPositions();
 
-  var pos = this.projectOnScreen(this.vLight.position);
+  var pos = this.projectOnScreen(this.sun.position);
   this.godrayPass.material.uniforms.fX.value = pos.x;
   this.godrayPass.material.uniforms.fY.value = pos.y;
 };
@@ -595,12 +594,12 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
 
   // interset with the sun
 
-  var closestPoint = ray.closestPointToPoint(this.vLight.position);
-  var closestPointDistance = closestPoint.distanceTo(this.vLight.position);
-  if(closestPointDistance < this.vLight.radius) {
+  var closestPoint = ray.closestPointToPoint(this.sun.position);
+  var closestPointDistance = closestPoint.distanceTo(this.sun.position);
+  if(closestPointDistance < this.sun.radius) {
     intersections.push({
       position: closestPoint,
-      radius: this.vLight.radius,
+      radius: this.sun.radius,
       direction: ray.direction
     });
   }
