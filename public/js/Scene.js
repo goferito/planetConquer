@@ -286,7 +286,8 @@ Scene.prototype.initRenderer = function () {
     );
 
     planet.mesh.position.x = planet.x;
-    planet.mesh.position.z = planet.y;
+    planet.mesh.position.y = planet.y;
+    planet.mesh.position.z = planet.z;
     // planet.mesh.position.y = radius;
     // planet.mesh.position.z = Math.random() * 400 - 200;
     planet.mesh.radius = radius;
@@ -355,12 +356,8 @@ Scene.prototype.initRenderer = function () {
   loader.load('assets/ship/ship.json', function (geometry, materials) {
     var ship = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
     this.shipMesh = ship;
+    this.shipMesh.scale.set(1.5, 1.5, 1.5);
   }.bind(this));
-  // setTimeout(function () {
-  //   new TWEEN.Tween(this.sun.position)
-  //     .to({x: 100, y: 100}, 4000)
-  //     .start();
-  // }.bind(this), 3000);
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -442,14 +439,14 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: -20, y: -300, ratio: 2, ships: 10 },
-      { x: -80, y: 250, ratio: 2, ships: 10 },
-      { x: -400, y: -260, ratio: 2, ships: 10 },
-      { x: 400,  y: 220, ratio: 2, ships: 10 },
-      { x: 100, y: 80, ratio: 2, ships: 10 },
-      { x: 180, y: -110, ratio: 2, ships: 10 },
-      { x: -420, y: 390, ratio: 4, ships: 10 },
-      { x: -200, y: 100, ratio: 2, ships: 10 },
+      { x: -20, y: 20, z: -300, ratio: 2, ships: 10 },
+      { x: -80, y: -20, z: 250, ratio: 2, ships: 10 },
+      { x: -400, y: 20, z: -260, ratio: 2, ships: 10 },
+      { x: 400, y: -30, z: 220, ratio: 2, ships: 10 },
+      { x: 120, y: 120, z: 80, ratio: 2, ships: 10 },
+      { x: 180, y: 30, z: -110, ratio: 2, ships: 10 },
+      { x: -420, y: -80, z: 200, ratio: 4, ships: 10 },
+      { x: -200, y: 50, z: 100, ratio: 2, ships: 10 },
     ]
   ];
 
@@ -512,9 +509,7 @@ Scene.prototype.getFleets = function(){
  * @return <String> color
  */
 Scene.prototype.getConquerorColor = function(conqId){
-  return !conqId
-           ? 'gray'
-           : this._conquerors[conqId].color || 'gray';
+  return !conqId ? 'gray' : this._conquerors[conqId].color || 'gray';
 };
 
 /**
@@ -757,6 +752,5 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
  * @return <Number>
  */
 function getDistance(origin, dest){
-  return Math.sqrt(  Math.pow(origin.x - dest.x, 2)
-                   + Math.pow(origin.y - dest.y, 2));
+  return origin.mesh.position.distanceTo(dest.mesh.position);
 }
