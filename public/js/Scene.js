@@ -12,7 +12,7 @@ var Scene = function(conquerors,
                                        this._initialPlanetRatio,
                                        this._initialShips);
   this._fleets = [];
-  this._speed = 0.03;
+  this._speed = 0.05;
 
   this.initRenderer();
 };
@@ -612,7 +612,9 @@ Scene.prototype.createShips = function (origin, dest, amount) {
   var color = this.getConquerorColor(origin.owner);
 
   var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
-  var d = 1.5;
+  var d = 1.2;
+
+  var r = origin.mesh.radius;
 
   for(var i = 0; i < amount; i++) {
     var mesh = this.shipMesh.clone();
@@ -620,9 +622,13 @@ Scene.prototype.createShips = function (origin, dest, amount) {
     mesh.material.materials[0] = material;
     mesh.material.materials[1] = material;
 
-    // mesh.position.x += Math.random() * 8 - 4;
-    // mesh.position.z += Math.random() * 8 - 4;
-    mesh.position.x = (i*d) - amount / 2 * d;
+    var dx = Math.random() * amount - amount / 2;
+    var dy = Math.random() * amount - amount / 2;
+    var dz = Math.random() * amount - amount / 2;
+
+    mesh.position.x = Math.min(Math.max(dx, -r), r);
+    mesh.position.y = Math.min(Math.max(dy, -r), r);
+    mesh.position.z = Math.min(Math.max(dz, -r), r);
 
     ships.add(mesh);
   }
