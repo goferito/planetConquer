@@ -607,76 +607,29 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
   return intersections;
 };
 
-Scene.prototype.createShip = function (origin, dest) {
+Scene.prototype.createShips = function (origin, dest, amount) {
+  var ships = new THREE.Object3D();
   var color = this.getConquerorColor(origin.owner);
 
   var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
-  var mesh = this.shipMesh.clone();
-  mesh.material.materials[0] = material;
-  mesh.material.materials[1] = material;
+  var d = 1.5;
 
-  mesh.position.copy(origin.mesh.position);
+  for(var i = 0; i < amount; i++) {
+    var mesh = this.shipMesh.clone();
 
-  var dh = Math.random() * 6 - 3;
+    mesh.material.materials[0] = material;
+    mesh.material.materials[1] = material;
 
-  var target = dest.mesh.position.clone();
+    // mesh.position.x += Math.random() * 8 - 4;
+    // mesh.position.z += Math.random() * 8 - 4;
+    mesh.position.x = (i*d) - amount / 2 * d;
 
-  var dist = mesh.position.distanceTo(target);
+    ships.add(mesh);
+  }
 
-  target.x += dh;
-  target.z += dh;
+  ships.position.copy(origin.mesh.position);
 
-  var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
-  var direction = directLine.clone().normalize();
-
-  target.sub(direction.clone().multiplyScalar(dest.mesh.radius));
-  var tt = dist / this._speed;
-
-  var lineMaterial = new THREE.LineBasicMaterial({
-    color: color,
-    transparent: true,
-    opacity: 0.15
-  });
-
-  var spline = this.getFleetSpline(origin, dest);
-  var geometry = new THREE.Geometry();
-  var splinePoints = spline.getPoints(32);
-
-  for(var i = 0; i < splinePoints.length; i++)
-    geometry.vertices.push(splinePoints[i]);
-
-  var line = new THREE.Line(geometry, lineMaterial);
-
-  this.scene.add(line);
-
-  // ocl mesh
-  // var oclMesh = new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-  // this.oclScene.add(oclMesh);
-  //
-  var tween = new TWEEN.Tween(mesh.position.clone())
-    .to(target, tt)
-    .easing(TWEEN.Easing.Linear.None)
-    .interpolation(TWEEN.Interpolation.Bezier)
-    .onUpdate(function (t) {
-      mesh.position.copy(spline.getPoint(t));
-      mesh.lookAt(spline.getPoint(t+0.001));
-      // oclMesh.position.copy(mesh.position);
-      // oclMesh.rotation.copy(mesh.rotation);
-    })
-    .onComplete(function () {
-      this.scene.remove(mesh);
-      this.scene.remove(line);
-
-      // this.oclScene.remove(oclMesh);
-
-      this.updateFleets();
-      this.updateLabels(dest);
-    }.bind(this))
-    .start();
-
-  this.scene.add(mesh);
-
-  return mesh;
+  return ships;
 };
 
 Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
@@ -711,7 +664,8 @@ Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
     splineTargets.push(halfWayPosition);
   }
 
-  splineTargets.push(dest.mesh.position.clone());
+  var destPosition = dest.mesh.position.clone();
+  splineTargets.push(destPosition);
 
   var spline = new THREE.SplineCurve3(splineTargets);
 
@@ -723,22 +677,62 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
   if(origin.ships < ships) return false;
 
   // Substract the ships to be sent
+
   origin.ships -= ships;
 
+  var distance = origin.mesh.position.distanceTo(dest.mesh.position);
+  var tt = distance / this._speed;
+
+  // Generate fleet route
+
+  var spline = this.getFleetSpline(origin, dest);
+  var geometry = new THREE.Geometry();
+  var splinePoints = spline.getPoints(32);
+
+  for(var i = 0; i < splinePoints.length; i++)
+    geometry.vertices.push(splinePoints[i]);
+
+  var splineMesh = new THREE.Line(geometry, new THREE.LineBasicMaterial({
+      color: this.getConquerorColor(origin.owner),
+      transparent: true,
+      opacity: 0.15
+  }));
+
+  this.scene.add(splineMesh);
+
   // Generate tiny 3d ships
-  var meshes = [];
-  for(var i = 0; i < ships; i++)
-    meshes.push(this.createShip(origin, dest));
+
+  var shipsMesh = this.createShips(origin, dest, ships);
+  this.scene.add(shipsMesh);
 
   // Add the fleet to the fleets array
+
   this._fleets.push({
     origin: origin,
     dest: dest,
     owner: origin.owner,
     ships: ships,
     start: new Date(),
-    meshes: meshes
   });
+
+  // Start the animation
+
+  var tween = new TWEEN.Tween(shipsMesh.position.clone())
+    .to(dest.mesh.position, tt)
+    .easing(TWEEN.Easing.Linear.None)
+    .interpolation(TWEEN.Interpolation.Bezier) // TODO: What happens without?
+    .onUpdate(function (t) {
+      shipsMesh.position.copy(spline.getPoint(t));
+      shipsMesh.lookAt(spline.getPoint(t+0.001));
+    })
+    .onComplete(function () {
+      this.scene.remove(shipsMesh);
+      this.scene.remove(splineMesh);
+
+      this.updateFleets();
+      this.updateLabels(dest);
+    }.bind(this))
+    .start();
 
   return true;
 };
