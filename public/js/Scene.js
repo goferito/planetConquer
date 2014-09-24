@@ -611,7 +611,8 @@ Scene.prototype.createShips = function (origin, dest, amount) {
   var ships = new THREE.Object3D();
   var color = this.getConquerorColor(origin.owner);
 
-  var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
+  var material01 = new THREE.MeshPhongMaterial({color: color, shininess: 50});
+  var material02 = new THREE.MeshPhongMaterial({color: color, shininess: 5});
   var d = 1.2;
 
   var r = origin.mesh.radius;
@@ -619,8 +620,8 @@ Scene.prototype.createShips = function (origin, dest, amount) {
   for(var i = 0; i < amount; i++) {
     var mesh = this.shipMesh.clone();
 
-    mesh.material.materials[0] = material;
-    mesh.material.materials[1] = material;
+    mesh.material.materials[0] = material01;
+    mesh.material.materials[1] = material02;
 
     var dx = Math.random() * amount - amount / 2;
     var dy = Math.random() * amount - amount / 2;
@@ -629,6 +630,8 @@ Scene.prototype.createShips = function (origin, dest, amount) {
     mesh.position.x = Math.min(Math.max(dx, -r), r);
     mesh.position.y = Math.min(Math.max(dy, -r), r);
     mesh.position.z = Math.min(Math.max(dz, -r), r);
+
+    mesh.scale.set(1.5, 1.5, 1.5);
 
     ships.add(mesh);
   }
@@ -673,6 +676,10 @@ Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
   var destPosition = dest.mesh.position.clone();
   splineTargets.push(destPosition);
 
+  // randomize y offsets
+  for(var i = 1; i < splineTargets.length - 1; i++)
+    splineTargets[i].y += Math.random() * 30 - 15;
+
   var spline = new THREE.SplineCurve3(splineTargets);
 
   return spline;
@@ -701,7 +708,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
   var splineMesh = new THREE.Line(geometry, new THREE.LineBasicMaterial({
       color: this.getConquerorColor(origin.owner),
       transparent: true,
-      opacity: 0.15
+      opacity: 0.4
   }));
 
   this.scene.add(splineMesh);
