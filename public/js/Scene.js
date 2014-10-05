@@ -1,4 +1,3 @@
-
 var Scene = function(conquerors,
                      initialShips){
 
@@ -19,6 +18,7 @@ var Scene = function(conquerors,
 };
 
 Scene.prototype.initRenderer = function () {
+  // main scene
   this.scene = new THREE.Scene();
   this.sceneCube = new THREE.Scene();
   this.clock = new THREE.Clock();
@@ -40,23 +40,18 @@ Scene.prototype.initRenderer = function () {
   this.controls.damping = 0.2;
   this.controls.maxDistance = 3500;
   this.controls.minDistance = 10;
-  this.controls.addEventListener('change', this.updateLabelPositions.bind(this));
+  this.controls.rotateSpeed = 0.3;
+  this.controls.addEventListener('change', this.onCameraChange.bind(this));
 
-  var light01 = new THREE.DirectionalLight(0xffffff, 1.0);
-  light01.position.set(1, 1, 1);
+  var light01 = new THREE.PointLight(0xffffff, 1.0);
   this.scene.add(light01);
 
-  var light02 = new THREE.DirectionalLight(0xffffff, 0.9);
-  light02.position.set(-1, -1, 1);
-  // this.scene.add(light02);
-
-  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.4);
+  var hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
   hemiLight.color.setHSL(0.6, 1, 0.6);
   hemiLight.groundColor.setHSL(0.095, 1, 0.75);
   hemiLight.position.set(0, 500, 0);
   this.scene.add(hemiLight);
 
-  // this.scene.add(new THREE.AmbientLight(0x333333));
   this.projector = new THREE.Projector();
 
   var urls = [
@@ -82,6 +77,7 @@ Scene.prototype.initRenderer = function () {
 
   var skyBox = new THREE.Mesh(new THREE.BoxGeometry(5200, 5200, 5200), material);
   this.sceneCube.add(skyBox);
+  this.scene.add(skyBox);
 
   var planetShininess = 40;
   this.planetMaterials = [
@@ -180,6 +176,100 @@ Scene.prototype.initRenderer = function () {
 
   this.renderer.setSize(window.innerWidth, window.innerHeight);
   this.renderer.setClearColor(0x000000);
+  this.renderer.autoClear = false;
+
+  //
+  // occlusion scene
+  //
+
+  this.oclScene = new THREE.Scene();
+  this.oclScene.add(new THREE.AmbientLight(0xffffff));
+  this.sun = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(32, 3),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    })
+  );
+
+  this.sun.radius = 80;
+
+  this.oclCamera = this.camera.clone();
+
+  this.sun.position.set(0, 0, 0);
+  this.oclScene.add(this.sun);
+
+  var sunScene = this.sun.clone();
+  sunScene.scale.set(1.2, 1.2, 1.2);
+  this.scene.add(sunScene);
+
+  //
+  // OCL Composer
+  //
+
+  var renderTargetParameters = {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    format: THREE.RGBFormat,
+    stencilBufer: false
+  };
+
+  this.oclRenderTarget = new THREE.WebGLRenderTarget(
+    window.innerWidth / 2,
+    window.innerHeight / 2,
+    renderTargetParameters
+  );
+
+  // Prepare the simple blur shader passes
+  var bluriness = 1.0;
+  hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+  vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
+  hblur.uniforms['h'].value = bluriness / window.innerWidth * 2;
+  vblur.uniforms['v'].value = bluriness / window.innerHeight * 2;
+
+  this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.oclCamera);
+
+  this.godrayPass = new THREE.ShaderPass(THREE.Extras.Shaders.Godrays);
+
+  var godrayUniforms = this.godrayPass.material.uniforms;
+  godrayUniforms.fExposure.value = 0.6;
+  godrayUniforms.fDecay.value = 0.93;
+  godrayUniforms.fDensity.value = 0.92;
+  godrayUniforms.fWeight.value = 0.5;
+  godrayUniforms.fClamp.value = 1.0;
+
+  var copyPass = new THREE.ShaderPass(THREE.CopyShader);
+  copyPass.needsSwap = true;
+  copyPass.renderToScreen = true;
+
+  this.oclComposer = new THREE.EffectComposer(this.renderer, this.oclRenderTarget);
+  this.oclComposer.addPass(this.oclRenderPass);
+  this.oclComposer.addPass(hblur);
+  this.oclComposer.addPass(vblur);
+  // this.oclComposer.addPass(hblur);
+  // this.oclComposer.addPass(vblur);
+  this.oclComposer.addPass(this.godrayPass);
+  this.oclComposer.addPass(copyPass);
+
+  //
+  // Final Composer
+  //
+
+  this.mainRenderPass = new THREE.RenderPass(this.scene, this.camera);
+
+  var finalPass = new THREE.ShaderPass(THREE.Extras.Shaders.Additive);
+  finalPass.material.uniforms.tAdd.value = this.oclComposer.renderTarget1;
+  finalPass.needsSwap = true;
+  finalPass.renderToScreen = true;
+
+  this.finalRenderTarget = new THREE.WebGLRenderTarget(
+    this.renderer.domElement.width,
+    this.renderer.domElement.height,
+    renderTargetParameters
+  );
+
+  this.finalComposer = new THREE.EffectComposer(this.renderer, this.finalRenderTarget);
+  this.finalComposer.addPass(this.mainRenderPass);
+  this.finalComposer.addPass(finalPass);
 
   document.body.appendChild(this.renderer.domElement);
 
@@ -196,13 +286,18 @@ Scene.prototype.initRenderer = function () {
     );
 
     planet.mesh.position.x = planet.x;
-    planet.mesh.position.z = planet.y;
+    planet.mesh.position.y = planet.y;
+    planet.mesh.position.z = planet.z;
     // planet.mesh.position.y = radius;
     // planet.mesh.position.z = Math.random() * 400 - 200;
     planet.mesh.radius = radius;
     planet.mesh.sphere = new THREE.Sphere(planet.mesh.position, radius);
 
     this.scene.add(planet.mesh);
+
+    var oclMesh = new THREE.Mesh(planet.mesh.geometry.clone(), new THREE.MeshBasicMaterial({color: 0x000000}));
+    oclMesh.position.copy(planet.mesh.position);
+    this.oclScene.add(oclMesh);
 
     var pos2d = this.toXYCoords(planet.mesh.position);
 
@@ -247,7 +342,22 @@ Scene.prototype.initRenderer = function () {
     mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
     this.scene.add(mesh);
+    var oclMesh = new THREE.Mesh(box.clone(), new THREE.MeshBasicMaterial({color: 0x000000}));
+    oclMesh.position.copy(mesh.position);
+    oclMesh.rotation.copy(mesh.rotation);
+    oclMesh.scale.set(2,2,2);
+    this.oclScene.add(oclMesh);
   }
+
+  // awesome ship model
+
+  var loader = new THREE.JSONLoader();
+
+  loader.load('assets/ship/ship.json', function (geometry, materials) {
+    var ship = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    this.shipMesh = ship;
+    this.shipMesh.scale.set(1.5, 1.5, 1.5);
+  }.bind(this));
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -255,6 +365,53 @@ Scene.prototype.toXYCoords = function (pos) {
   vector.x = (vector.x + 1)/2 * window.innerWidth;
   vector.y = -(vector.y - 1)/2 * window.innerHeight;
   return vector;
+};
+
+/**
+ * Returns position on screen in UV coordinates
+ */
+Scene.prototype.projectOnScreen = function (pos) {
+  var vector = this.projector.projectVector(pos.clone(), this.camera)
+    .multiplyScalar(0.5)
+    .addScalar(0.5);
+  return vector;
+};
+
+/**
+ * Renders the 3d scene with Three.js
+ * @param <float> dt - elapsed time since last frame
+ */
+Scene.prototype.render = function (dt) {
+  this.cameraCube.rotation.copy(this.camera.rotation);
+  this.cameraCube.position.copy(this.camera.position);
+
+  this.oclCamera.rotation.copy(this.camera.rotation);
+  this.oclCamera.position.copy(this.camera.position);
+
+  this.oclComposer.render();
+  this.finalComposer.render();
+};
+
+Scene.prototype.animate = function () {
+  requestAnimationFrame(this.animate.bind(this));
+  var dt = this.clock.getDelta();
+
+  TWEEN.update();
+
+  this._planets.forEach(function (p) {
+    if(p.mesh)
+      p.mesh.rotation.y += 0.15 * dt;
+  });
+
+  this.render(dt);
+};
+
+Scene.prototype.onCameraChange = function () {
+  this.updateLabelPositions();
+
+  var pos = this.projectOnScreen(this.sun.position);
+  this.godrayPass.material.uniforms.fX.value = pos.x;
+  this.godrayPass.material.uniforms.fY.value = pos.y;
 };
 
 Scene.prototype.updateLabelPositions = function () {
@@ -282,14 +439,14 @@ Scene.prototype.generatePlanets = function(conquerors,
   //TODO create more maps
   var maps =  [
     [
-      { x: -20, y: -300, ratio: 2, ships: 10 },
-      { x: -80, y: 250, ratio: 2, ships: 10 },
-      { x: -400, y: -260, ratio: 2, ships: 10 },
-      { x: 400,  y: 220, ratio: 2, ships: 10 },
-      { x: 100, y: 80, ratio: 2, ships: 10 },
-      { x: 180, y: -110, ratio: 2, ships: 10 },
-      { x: -420, y: 390, ratio: 4, ships: 10 },
-      { x: -200, y: 100, ratio: 2, ships: 10 },
+      { x: -20, y: 20, z: -300, ratio: 2, ships: 10 },
+      { x: -80, y: -20, z: 250, ratio: 2, ships: 10 },
+      { x: -400, y: 20, z: -260, ratio: 2, ships: 10 },
+      { x: 400, y: -30, z: 220, ratio: 2, ships: 10 },
+      { x: 120, y: 120, z: 80, ratio: 2, ships: 10 },
+      { x: 180, y: 30, z: -110, ratio: 2, ships: 10 },
+      { x: -420, y: -80, z: 200, ratio: 4, ships: 10 },
+      { x: -200, y: 50, z: 100, ratio: 2, ships: 10 },
     ]
   ];
 
@@ -352,38 +509,7 @@ Scene.prototype.getFleets = function(){
  * @return <String> color
  */
 Scene.prototype.getConquerorColor = function(conqId){
-  return !conqId
-           ? 'gray'
-           : this._conquerors[conqId].color || 'gray';
-};
-
-/**
- * Renders the 3d scene with Three.js
- * @param <float> dt - elapsed time since last frame
- */
-Scene.prototype.render = function (dt) {
-  this.cameraCube.rotation.copy(this.camera.rotation);
-  this.cameraCube.position.copy(this.camera.position);
-
-  this.renderer.autoClear = false;
-  this.renderer.clear();
-
-  this.renderer.render(this.sceneCube, this.cameraCube);
-  this.renderer.render(this.scene, this.camera);
-};
-
-Scene.prototype.animate = function () {
-  requestAnimationFrame(this.animate.bind(this));
-  var dt = this.clock.getDelta();
-
-  TWEEN.update();
-
-  this._planets.forEach(function (p) {
-    if(p.mesh)
-      p.mesh.rotation.y += 0.15 * dt;
-  });
-
-  this.render(dt);
+  return !conqId ? 'gray' : this._conquerors[conqId].color || 'gray';
 };
 
 /**
@@ -461,102 +587,99 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
     }
   });
 
+  // interset with the sun
+
+  var closestPoint = ray.closestPointToPoint(this.sun.position);
+  var closestPointDistance = closestPoint.distanceTo(this.sun.position);
+  if(closestPointDistance < this.sun.radius) {
+    intersections.push({
+      position: closestPoint,
+      radius: this.sun.radius,
+      direction: ray.direction
+    });
+  }
+
   return intersections;
 };
 
-Scene.prototype.createShip = function (origin, dest, maxY) {
+Scene.prototype.createShips = function (origin, dest, amount) {
+  var ships = new THREE.Object3D();
   var color = this.getConquerorColor(origin.owner);
 
-  var box = new THREE.BoxGeometry(0.7, 0.7, 5);
-  var material = new THREE.MeshPhongMaterial({color: color, shininess: 50});
-  var mesh = new THREE.Mesh(box, material);
+  var material = new THREE.MeshFaceMaterial([
+    new THREE.MeshPhongMaterial({color: color, shininess: 50}),
+    new THREE.MeshPhongMaterial({color: color, shininess: 5})
+  ]);
 
-  mesh.position.copy(origin.mesh.position);
+  var d = 1.2;
 
-  var dh = Math.random() * 6 - 3;
+  var r = origin.mesh.radius;
 
-  var target = dest.mesh.position.clone();
+  for(var i = 0; i < amount; i++) {
+    var mesh = this.shipMesh.clone();
 
-  var dist = mesh.position.distanceTo(target);
+    mesh.material = material;
 
-  target.x += dh;
-  target.z += dh;
+    var dx = Math.random() * amount - amount / 2;
+    var dy = Math.random() * amount - amount / 2;
+    var dz = Math.random() * amount - amount / 2;
+
+    mesh.position.x = Math.min(Math.max(dx, -r), r);
+    mesh.position.y = Math.min(Math.max(dy, -r), r);
+    mesh.position.z = Math.min(Math.max(dz, -r), r);
+
+    mesh.scale.set(1.5, 1.5, 1.5);
+
+    ships.add(mesh);
+  }
+
+  ships.position.copy(origin.mesh.position);
+
+  return ships;
+};
+
+Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
+  var splineTargets = [];
+  var halfWayOffsetVector = halfWayOffsetVector || new THREE.Vector3(0, 50, 0);
+
+  var intersectionPathDirection = Math.random() > 0.5;
 
   var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
   var direction = directLine.clone().normalize();
 
-  target.sub(direction.clone().multiplyScalar(dest.mesh.radius));
-  var tt = dist / this._speed;
-
-  var lineMaterial = new THREE.LineBasicMaterial({
-    color: color,
-    transparent: true,
-    opacity: 0.15
-  });
-
-  var splineTargets = [];
-
-  var startPosition = mesh.position.clone();
+  var startPosition = origin.mesh.position.clone();
   startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
-  startPosition.x += dh;
-  startPosition.y += dh;
-  startPosition.z += dh;
 
   splineTargets.push(startPosition);
 
-  var intersections = this.intersectPlanets(origin, dest, dist);
+  var intersections = this.intersectPlanets(origin, dest, directLine.length());
   intersections.forEach(function (intersect) {
     var pos = intersect.position.clone();
-    pos.x += dh;
-    pos.y += dh / 4 + ((maxY > 0 ? intersect.radius : -intersect.radius) * 2);
-    pos.z += dh;
+    pos.y += (intersectionPathDirection ? intersect.radius : -intersect.radius) * 2;
     splineTargets.push(pos);
   });
 
   if(intersections.length == 0) {
     var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
 
-    halfWayPosition.x += dh;
-    halfWayPosition.y += dh / 4 + maxY;
-    halfWayPosition.z += dh;
+    if(intersectionPathDirection)
+      halfWayPosition.add(halfWayOffsetVector);
+    else
+      halfWayPosition.sub(halfWayOffsetVector);
 
     splineTargets.push(halfWayPosition);
   }
 
-  splineTargets.push(target);
+  var destPosition = dest.mesh.position.clone();
+  splineTargets.push(destPosition);
+
+  // randomize y offsets
+  for(var i = 1; i < splineTargets.length - 1; i++)
+    splineTargets[i].y += Math.random() * 30 - 15;
 
   var spline = new THREE.SplineCurve3(splineTargets);
 
-  var geometry = new THREE.Geometry();
-  var splinePoints = spline.getPoints(32);
-
-  for(var i = 0; i < splinePoints.length; i++)
-    geometry.vertices.push(splinePoints[i]);
-
-  var line = new THREE.Line(geometry, lineMaterial);
-
-  this.scene.add(line);
-
-  var tween = new TWEEN.Tween(mesh.position.clone())
-    .to(target, tt)
-    .easing(TWEEN.Easing.Linear.None)
-    .interpolation(TWEEN.Interpolation.Bezier)
-    .onUpdate(function (t) {
-      mesh.position.copy(spline.getPoint(t));
-      mesh.lookAt(spline.getPoint(t+0.001));
-    })
-    .onComplete(function () {
-      this.scene.remove(mesh);
-      this.scene.remove(line);
-
-      this.updateFleets();
-      this.updateLabels(dest);
-    }.bind(this))
-    .start();
-
-  this.scene.add(mesh);
-
-  return mesh;
+  return spline;
 };
 
 Scene.prototype.sendFleet = function (origin, dest, ships) {
@@ -564,27 +687,65 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
   if(origin.ships < ships) return false;
 
   // Substract the ships to be sent
+
   origin.ships -= ships;
 
+  var distance = origin.mesh.position.distanceTo(dest.mesh.position);
+  var tt = distance / this._speed;
+
+  // Generate fleet route
+
+  var spline = this.getFleetSpline(origin, dest);
+  var geometry = new THREE.Geometry();
+  var splinePoints = spline.getPoints(42);
+
+  for(var i = 0; i < splinePoints.length; i++)
+    geometry.vertices.push(splinePoints[i]);
+
+  var splineMesh = new THREE.Line(geometry, new THREE.LineBasicMaterial({
+      color: this.getConquerorColor(origin.owner),
+      transparent: true,
+      opacity: 0.4
+  }));
+
+  this.scene.add(splineMesh);
+
   // Generate tiny 3d ships
-  var maxY = Math.random() * 100 - 50;
-  var meshes = [];
-  for(var i = 0; i < ships; i++)
-    meshes.push(this.createShip(origin, dest, maxY));
+
+  var shipsMesh = this.createShips(origin, dest, ships);
+  this.scene.add(shipsMesh);
 
   // Add the fleet to the fleets array
+
   this._fleets.push({
     origin: origin,
     dest: dest,
     owner: origin.owner,
     ships: ships,
     start: new Date(),
-    meshes: meshes
   });
+
+  // Start the animation
+
+  var tween = new TWEEN.Tween(shipsMesh.position.clone())
+    .to(dest.mesh.position, tt)
+    .easing(TWEEN.Easing.Linear.None)
+    .interpolation(TWEEN.Interpolation.Bezier) // TODO: What happens without?
+    .onUpdate(function (t) {
+      shipsMesh.position.copy(spline.getPoint(t));
+      shipsMesh.lookAt(spline.getPoint(t+0.001));
+    })
+    .onComplete(function () {
+      this.scene.remove(shipsMesh);
+      this.scene.remove(splineMesh);
+
+      this.updateFleets();
+      this.updateLabels(dest);
+    }.bind(this))
+    .start();
 
   return true;
 };
-
 
 /**
  * Calculates the distance between two planets
@@ -593,8 +754,5 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
  * @return <Number>
  */
 function getDistance(origin, dest){
-  return Math.sqrt(  Math.pow(origin.x - dest.x, 2)
-                   + Math.pow(origin.y - dest.y, 2));
+  return origin.mesh.position.distanceTo(dest.mesh.position);
 }
-
-
