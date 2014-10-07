@@ -78,7 +78,9 @@ THREE.Extras.Shaders = {
 			tDiffuse: { type: "t", value: 0, texture: null },
 			tLens: { type: "t", value: 0, texture: null },
 			tAdd: { type: "t", value: 1, texture: null },
-			fCoeff: { type: "f", value: 1.0 }
+			fCoeff: { type: "f", value: 1.0 },
+			fLensSun: { type: "f", value: 0.6 },
+			fLensDiffuse: { type: "f", value: 0.2 }
 		},
 
 		vertexShader: [
@@ -97,6 +99,8 @@ THREE.Extras.Shaders = {
 			"uniform sampler2D tAdd;",
 			"uniform sampler2D tLens;",
 			"uniform float fCoeff;",
+			"uniform float fLensSun;",
+			"uniform float fLensDiffuse;",
 
 			"varying vec2 vUv;",
 
@@ -106,8 +110,7 @@ THREE.Extras.Shaders = {
 				"vec4 add = texture2D( tAdd, vUv );",
 				"vec4 lens = texture2D( tLens, vUv );",
 
-				"gl_FragColor = texel + add * fCoeff + lens * texel * add * 2.0;",
-				// "gl_FragColor = lens;",
+				"gl_FragColor = (texel + add * fCoeff) + (lens * add * fLensSun + lens * texel * fLensDiffuse);",
 
 			"}"
 		].join("\n")

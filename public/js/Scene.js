@@ -241,14 +241,6 @@ Scene.prototype.initRenderer = function () {
   copyPass.needsSwap = true;
   copyPass.renderToScreen = true;
 
-  // lens dirt
-
-  var lensDirtTexture = THREE.ImageUtils.loadTexture('assets/lens/lens.png');
-  var lensDirtMesh = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshPhongMaterial({map: lensDirtTexture}));
-  lensDirtMesh.position.copy(this.camera.position);
-  lensDirtMesh.rotation.copy(this.camera.rotation);
-  lensDirtMesh.translateZ(-50);
-
   this.oclComposer = new THREE.EffectComposer(this.renderer, this.oclRenderTarget);
   this.oclComposer.addPass(this.oclRenderPass);
   this.oclComposer.addPass(hblur);
@@ -261,6 +253,10 @@ Scene.prototype.initRenderer = function () {
   //
   // Final Composer
   //
+
+  var lensDirtTexture = THREE.ImageUtils.loadTexture('assets/lens/lens3.jpg');
+  lensDirtTexture.wrapS = THREE.MirroredRepeatWrapping;
+  lensDirtTexture.wrapT = THREE.MirroredRepeatWrapping;
 
   this.mainRenderPass = new THREE.RenderPass(this.scene, this.camera);
 
