@@ -241,6 +241,14 @@ Scene.prototype.initRenderer = function () {
   copyPass.needsSwap = true;
   copyPass.renderToScreen = true;
 
+  // lens dirt
+
+  var lensDirtTexture = THREE.ImageUtils.loadTexture('assets/lens/lens.png');
+  var lensDirtMesh = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshPhongMaterial({map: lensDirtTexture}));
+  lensDirtMesh.position.copy(this.camera.position);
+  lensDirtMesh.rotation.copy(this.camera.rotation);
+  lensDirtMesh.translateZ(-50);
+
   this.oclComposer = new THREE.EffectComposer(this.renderer, this.oclRenderTarget);
   this.oclComposer.addPass(this.oclRenderPass);
   this.oclComposer.addPass(hblur);
@@ -258,6 +266,7 @@ Scene.prototype.initRenderer = function () {
 
   var finalPass = new THREE.ShaderPass(THREE.Extras.Shaders.Additive);
   finalPass.material.uniforms.tAdd.value = this.oclComposer.renderTarget1;
+  finalPass.material.uniforms.tLens.value = lensDirtTexture;
   finalPass.needsSwap = true;
   finalPass.renderToScreen = true;
 
@@ -372,7 +381,8 @@ Scene.prototype.initRenderer = function () {
 
   lensFlare.customUpdateCallback = this.onLensFlareUpdate;
   lensFlare.position.copy(this.sun.position);
-  this.scene.add(lensFlare);
+  // TODO: Something is wrong with this class
+  // this.scene.add(lensFlare);
 };
 
 Scene.prototype.toXYCoords = function (pos) {

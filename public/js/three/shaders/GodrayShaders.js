@@ -76,6 +76,7 @@ THREE.Extras.Shaders = {
 	Additive: {
 		uniforms: {
 			tDiffuse: { type: "t", value: 0, texture: null },
+			tLens: { type: "t", value: 0, texture: null },
 			tAdd: { type: "t", value: 1, texture: null },
 			fCoeff: { type: "f", value: 1.0 }
 		},
@@ -94,6 +95,7 @@ THREE.Extras.Shaders = {
 		fragmentShader: [
 			"uniform sampler2D tDiffuse;",
 			"uniform sampler2D tAdd;",
+			"uniform sampler2D tLens;",
 			"uniform float fCoeff;",
 
 			"varying vec2 vUv;",
@@ -102,7 +104,10 @@ THREE.Extras.Shaders = {
 
 				"vec4 texel = texture2D( tDiffuse, vUv );",
 				"vec4 add = texture2D( tAdd, vUv );",
-				"gl_FragColor = texel + add * fCoeff;",
+				"vec4 lens = texture2D( tLens, vUv );",
+
+				"gl_FragColor = texel + add * fCoeff + lens * texel * add * 2.0;",
+				// "gl_FragColor = lens;",
 
 			"}"
 		].join("\n")
