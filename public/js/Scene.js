@@ -358,6 +358,21 @@ Scene.prototype.initRenderer = function () {
     this.shipMesh = ship;
     this.shipMesh.scale.set(1.5, 1.5, 1.5);
   }.bind(this));
+
+  // lens flare :)
+
+  var flare0 = THREE.ImageUtils.loadTexture('assets/lens/lensflare0.png');
+  var flare2 = THREE.ImageUtils.loadTexture('assets/lens/lensflare2.png');
+  var flare3 = THREE.ImageUtils.loadTexture('assets/lens/lensflare3.png');
+
+  var lensFlare = new THREE.LensFlare(flare0, 700, 0.0, THREE.AdditiveBlending, new THREE.Color(0xffffff));
+  lensFlare.add(flare2, 512, 0.0, THREE.AdditiveBlending);
+  lensFlare.add(flare2, 512, 0.0, THREE.AdditiveBlending);
+  lensFlare.add(flare2, 512, 0.0, THREE.AdditiveBlending);
+
+  lensFlare.customUpdateCallback = this.onLensFlareUpdate;
+  lensFlare.position.copy(this.sun.position);
+  this.scene.add(lensFlare);
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -404,6 +419,20 @@ Scene.prototype.animate = function () {
   });
 
   this.render(dt);
+};
+
+Scene.prototype.onLensFlareUpdate = function (object) {
+  var x = -object.positionScreen.x * 2;
+  var y = -object.positionScreen.y * 2;
+
+  object.lensFlares.forEach(function (flare) {
+    flare.x = object.positionScreen.x + x * flare.distance;
+    flare.y = object.positionScreen.y + y * flare.distance;
+    flare.rotation = 0;
+  });
+
+  // object.lensFlares[2].y += 0.025;
+  // object.lensFlares[3].rotation = object.positionScreen.x * 0.5 + THREE.Math.degToRad(45);
 };
 
 Scene.prototype.onCameraChange = function () {
