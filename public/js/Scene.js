@@ -82,88 +82,88 @@ Scene.prototype.initRenderer = function () {
   var planetShininess = 40;
   this.planetMaterials = [
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/earthmap1k.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/earthmap1k.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/earthbump1k.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/jupitermap.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/jupitermap.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/mars_1k_color.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/mars_1k_color.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/marsbump1k.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/mercurymap.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/mercurymap.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/mercurybump.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/neptunemap.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/neptunemap.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/plutomap1k.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/plutomap1k.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/plutobump1k.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/saturnmap.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/saturnmap.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/venusmap.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/venusmap.jpg'),
+      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/venusbump.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_1_d.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_2_d.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_3_d.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_4_d.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_5_d.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_7_d.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/Planet_Avalon_1600.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/Planet_Avalon_1600.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Dagobah1200.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Dam-Ba-Da1200.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Jinx1200.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Klendathu1200.jpg'),
       shininess: planetShininess,
     }),
     new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.jpg'),
+      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Terminus1200.jpg'),
       shininess: planetShininess,
     }),
   ];
@@ -254,10 +254,13 @@ Scene.prototype.initRenderer = function () {
   // Final Composer
   //
 
+  var lensDirtTexture = THREE.ImageUtils.loadTexture('assets/lens/lens3.jpg');
+
   this.mainRenderPass = new THREE.RenderPass(this.scene, this.camera);
 
   var finalPass = new THREE.ShaderPass(THREE.Extras.Shaders.Additive);
   finalPass.material.uniforms.tAdd.value = this.oclComposer.renderTarget1;
+  finalPass.material.uniforms.tLens.value = lensDirtTexture;
   finalPass.needsSwap = true;
   finalPass.renderToScreen = true;
 

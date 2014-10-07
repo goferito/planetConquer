@@ -1,8 +1,8 @@
 /*!
  * THREE.Extras.Shaders contains extra Fx shaders like godrays
- * 
+ *
  * @author Thibaut 'BKcore' Despoulain <http://bkcore.com>
- * 
+ *
  */
 
 THREE = THREE || {};
@@ -28,7 +28,7 @@ THREE.Extras.Shaders = {
 			"void main() {",
 
 				"vUv = uv;",
-				"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+				"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
 
 			"}"
 		].join("\n"),
@@ -76,8 +76,11 @@ THREE.Extras.Shaders = {
 	Additive: {
 		uniforms: {
 			tDiffuse: { type: "t", value: 0, texture: null },
+			tLens: { type: "t", value: 0, texture: null },
 			tAdd: { type: "t", value: 1, texture: null },
-			fCoeff: { type: "f", value: 1.0 }
+			fCoeff: { type: "f", value: 1.0 },
+			fLensSun: { type: "f", value: 0.6 },
+			fLensDiffuse: { type: "f", value: 0.2 }
 		},
 
 		vertexShader: [
@@ -86,7 +89,7 @@ THREE.Extras.Shaders = {
 			"void main() {",
 
 				"vUv = uv;",
-				"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+				"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
 
 			"}"
 		].join("\n"),
@@ -94,15 +97,20 @@ THREE.Extras.Shaders = {
 		fragmentShader: [
 			"uniform sampler2D tDiffuse;",
 			"uniform sampler2D tAdd;",
+			"uniform sampler2D tLens;",
 			"uniform float fCoeff;",
+			"uniform float fLensSun;",
+			"uniform float fLensDiffuse;",
 
 			"varying vec2 vUv;",
 
 			"void main() {",
 
-				"vec4 texel = texture2D( tDiffuse, vUv );",
-				"vec4 add = texture2D( tAdd, vUv );",
-				"gl_FragColor = texel + add * fCoeff;",
+				"vec4 texel = texture2D(tDiffuse, vUv);",
+				"vec4 add = texture2D(tAdd, vUv);",
+				"vec4 lens = texture2D(tLens, vUv);",
+
+				"gl_FragColor = (texel + add * fCoeff) + (lens * add * fLensSun + lens * texel * fLensDiffuse);",
 
 			"}"
 		].join("\n")
