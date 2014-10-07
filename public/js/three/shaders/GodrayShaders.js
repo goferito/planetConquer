@@ -1,8 +1,8 @@
 /*!
  * THREE.Extras.Shaders contains extra Fx shaders like godrays
- * 
+ *
  * @author Thibaut 'BKcore' Despoulain <http://bkcore.com>
- * 
+ *
  */
 
 THREE = THREE || {};
@@ -28,7 +28,7 @@ THREE.Extras.Shaders = {
 			"void main() {",
 
 				"vUv = uv;",
-				"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+				"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
 
 			"}"
 		].join("\n"),
@@ -89,7 +89,7 @@ THREE.Extras.Shaders = {
 			"void main() {",
 
 				"vUv = uv;",
-				"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+				"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
 
 			"}"
 		].join("\n"),
@@ -106,9 +106,9 @@ THREE.Extras.Shaders = {
 
 			"void main() {",
 
-				"vec4 texel = texture2D( tDiffuse, vUv );",
-				"vec4 add = texture2D( tAdd, vUv );",
-				"vec4 lens = texture2D( tLens, vUv );",
+				"vec4 texel = texture2D(tDiffuse, vUv);",
+				"vec4 add = texture2D(tAdd, vUv);",
+				"vec4 lens = texture2D(tLens, vUv);",
 
 				"gl_FragColor = (texel + add * fCoeff) + (lens * add * fLensSun + lens * texel * fLensDiffuse);",
 
