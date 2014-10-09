@@ -1,3 +1,17 @@
+var Scene = require('./Scene');
+var AI = require('./AI');
+var Player = require('./Player');
+
+var conquerors_config = {
+  conquerors: [
+    { name: 'Saa',  color: 0x3333ff,  ai: AI.culoVeo },
+    { name: 'Adam', color: 0xff3333,   ai: AI.culoVeo },
+    { name: 'Tilo', color: 0x33ff00, ai: AI.culoVeo },
+    { name: 'Ray',  color: 0x33ffff,  ai: AI.culoVeo }
+  ],
+
+  conquerorsInitialShips: 30
+};
 
 function init(){
 

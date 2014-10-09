@@ -759,3 +759,5 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
 function getDistance(origin, dest){
   return origin.mesh.position.distanceTo(dest.mesh.position);
 }
+
+module.exports = Scene;

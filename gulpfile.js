@@ -1,10 +1,10 @@
-var gulp = require('gulp'),
-    jshint = require('gulp-jshint'),
-    uglify = require('gulp-uglify'),
-    concat = require('gulp-concat'),
-    clean = require('gulp-clean'),
-    browserify = require('gulp-browserify'),
-    stylus = require('gulp-stylus');
+var gulp = require('gulp');
+var jshint = require('gulp-jshint');
+var uglify = require('gulp-uglify');
+var concat = require('gulp-concat');
+var clean = require('gulp-clean');
+var browserify = require('gulp-browserify');
+var stylus = require('gulp-stylus');
 
 gulp.task('clean', function () {
   return gulp.src(
@@ -72,9 +72,9 @@ gulp.task('js', function () {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('public/*.js', ['js']);
-  gulp.watch('public/three/**/*', ['libs']);
-  gulp.watch('public/tween/*.js', ['libs']);
+  gulp.watch('public/js/*.js', ['js']);
+  gulp.watch('public/js/three/**/*', ['libs']);
+  gulp.watch('public/js/tween/*.js', ['libs']);
   gulp.watch('public/assets/**/*', ['assets']);
   gulp.watch('public/css/*', ['css']);
 });
