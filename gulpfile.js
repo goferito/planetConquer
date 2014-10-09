@@ -70,3 +70,14 @@ gulp.task('js', function () {
     }))
     .pipe(gulp.dest('build/js'));
 });
+
+gulp.task('watch', function() {
+  gulp.watch('public/*.js', ['js']);
+  gulp.watch('public/three/**/*', ['libs']);
+  gulp.watch('public/tween/*.js', ['libs']);
+  gulp.watch('public/assets/**/*', ['assets']);
+  gulp.watch('public/css/*', ['css']);
+});
+
+gulp.task('default', ['watch', 'assets', 'libs', 'css', 'js']);
+
