@@ -30,24 +30,24 @@ gulp.task('assets', function () {
 
 gulp.task('libs', function () {
   return gulp.src([
-      'src/public/js/three/three.js',
-      'src/public/js/three/OrbitControls.js',
-      'src/public/js/three/shaders/CopyShader.js',
-      'src/public/js/three/shaders/HorizontalBlurShader.js',
-      'src/public/js/three/shaders/VerticalBlurShader.js',
-      'src/public/js/three/shaders/GodrayShaders.js',
-      'src/public/js/three/postprocessing/ShaderPass.js',
-      'src/public/js/three/postprocessing/EffectComposer.js',
-      'src/public/js/three/postprocessing/MaskPass.js',
-      'src/public/js/three/postprocessing/RenderPass.js',
-      'src/public/js/tween/tween.min.js'
+      'src/public/libs/three/three.js',
+      'src/public/libs/three/OrbitControls.js',
+      'src/public/libs/three/shaders/CopyShader.js',
+      'src/public/libs/three/shaders/HorizontalBlurShader.js',
+      'src/public/libs/three/shaders/VerticalBlurShader.js',
+      'src/public/libs/three/shaders/GodrayShaders.js',
+      'src/public/libs/three/postprocessing/ShaderPass.js',
+      'src/public/libs/three/postprocessing/EffectComposer.js',
+      'src/public/libs/three/postprocessing/MaskPass.js',
+      'src/public/libs/three/postprocessing/RenderPass.js',
+      'src/public/libs/tween/tween.min.js'
     ])
     .pipe(concat('libs.js'))
     .pipe(gulp.dest('build/js'));
 });
 
 gulp.task('js', function () {
-  return gulp.src('src/public/js/app.js')
+  return gulp.src('src/public/app.js')
     .pipe(jshint({
       indent: 2,
       newcap: true,
@@ -65,16 +65,15 @@ gulp.task('js', function () {
     }))
     .pipe(browserify({
       insertGlobals: true,
-      extensions: ['.jsx'],
       debug: true
     }))
     .pipe(gulp.dest('build/js'));
 });
 
 gulp.task('watch', function() {
-  gulp.watch('src/public/js/*.js', ['js']);
-  gulp.watch('src/public/js/three/**/*', ['libs']);
-  gulp.watch('src/public/js/tween/*.js', ['libs']);
+  gulp.watch('src/public/*.js', ['js']);
+  gulp.watch('src/public/libs/three/**/*', ['libs']);
+  gulp.watch('src/public/libs/tween/*.js', ['libs']);
   gulp.watch('src/public/assets/**/*', ['assets']);
   gulp.watch('src/public/css/*', ['css']);
 });
