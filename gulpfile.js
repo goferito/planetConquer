@@ -53,7 +53,11 @@ gulp.task('jshint', function () {
       globals: {
         module: true,
         THREE: true,
-        TWEEN: true
+        TWEEN: true,
+        console: true,
+        window: true,
+        requestAnimationFrame: true,
+        setInterval: true
       },
       indent: 2,
       newcap: true,
@@ -63,7 +67,7 @@ gulp.task('jshint', function () {
       undef: true,
       unused: true,
       trailing: true,
-      maxlen: 80,
+      maxlen: 120,
       expr: true,
       loopfunc: true,
       predef: ['window', 'document', 'require']

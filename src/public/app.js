@@ -31,7 +31,7 @@ function init(){
     });
 
     myScene.growRatios();
-  }, turnTime)
+  }, turnTime);
 }
 
 window.onload = init;

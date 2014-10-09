@@ -64,10 +64,10 @@ Scene.prototype.initRenderer = function () {
 
   this.environmentMap = THREE.ImageUtils.loadTextureCube(urls);
 
-  var shader = THREE.ShaderLib['cube'];
-  shader.uniforms['tCube'].value = this.environmentMap;
+  var shader = THREE.ShaderLib.cube;
+  shader.uniforms.tCube.value = this.environmentMap;
 
-  var material = new THREE.ShaderMaterial({
+  var skyBoxMaterial = new THREE.ShaderMaterial({
     fragmentShader: shader.fragmentShader,
     vertexShader: shader.vertexShader,
     uniforms: shader.uniforms,
@@ -75,7 +75,11 @@ Scene.prototype.initRenderer = function () {
     side: THREE.BackSide
   });
 
-  var skyBox = new THREE.Mesh(new THREE.BoxGeometry(5200, 5200, 5200), material);
+  var skyBox = new THREE.Mesh(
+    new THREE.BoxGeometry(5200, 5200, 5200),
+    skyBoxMaterial
+  );
+
   this.sceneCube.add(skyBox);
   this.scene.add(skyBox);
 
@@ -221,10 +225,10 @@ Scene.prototype.initRenderer = function () {
 
   // Prepare the simple blur shader passes
   var bluriness = 1.0;
-  hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
-  vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
-  hblur.uniforms['h'].value = bluriness / window.innerWidth * 2;
-  vblur.uniforms['v'].value = bluriness / window.innerHeight * 2;
+  var hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+  var vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
+  hblur.uniforms.h.value = bluriness / window.innerWidth * 2;
+  vblur.uniforms.v.value = bluriness / window.innerHeight * 2;
 
   this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.oclCamera);
 
@@ -384,7 +388,7 @@ Scene.prototype.projectOnScreen = function (pos) {
  * Renders the 3d scene with Three.js
  * @param <float> dt - elapsed time since last frame
  */
-Scene.prototype.render = function (dt) {
+Scene.prototype.render = function () {
   this.cameraCube.rotation.copy(this.camera.rotation);
   this.cameraCube.position.copy(this.camera.position);
 
@@ -406,7 +410,7 @@ Scene.prototype.animate = function () {
       p.mesh.rotation.y += 0.15 * dt;
   });
 
-  this.render(dt);
+  this.render();
 };
 
 Scene.prototype.onCameraChange = function () {
@@ -454,8 +458,8 @@ Scene.prototype.generatePlanets = function(conquerors,
   ];
 
   //TODO test this
-  var mapPos = Math.floor(Math.random() * maps.length)
-    , map = maps[mapPos]
+  var mapPos = Math.floor(Math.random() * maps.length),
+      map = maps[mapPos];
 
   //Put the players in the first planets
   conquerors.forEach(function(conq, i){
@@ -519,28 +523,17 @@ Scene.prototype.getConquerorColor = function(conqId){
  * Removes the fleets that have already got to their destination
  */
 Scene.prototype.updateFleets = function(){
-
-    var t = new Date()
-      , fleet;
+    var t = new Date(), fleet;
 
     for(var i in this._fleets){
       fleet = this._fleets[i];
 
-      var dist = getDistance(fleet.origin, fleet.dest)
-
-        // Trip time
-        , tt = dist / this._speed
-
-        // Elapsed time
-        , elapsed = t - fleet.start
-
-        // Percent travelled
-        , pTravelled = elapsed / tt;
-
+      var dist = getDistance(fleet.origin, fleet.dest),
+          tt = dist / this._speed,
+          elapsed = t - fleet.start;
 
       // If travelled 100% percent of the trip
       if(elapsed >= tt){
-
         // Add ships to the new planet
         if(fleet.owner != fleet.dest.owner){
           fleet.dest.ships -= fleet.ships;
@@ -552,18 +545,14 @@ Scene.prototype.updateFleets = function(){
             // Planet Conquered!!
             fleet.dest.owner = fleet.owner;
           }
-
         }else{
           fleet.dest.ships += fleet.ships;
         }
 
         // Remove fleet from fleets list
         this._fleets.splice(i, 1);
-
       }
-
     }
-
 };
 
 /**
@@ -614,8 +603,6 @@ Scene.prototype.createShips = function (origin, dest, amount) {
     new THREE.MeshPhongMaterial({color: color, shininess: 5})
   ]);
 
-  var d = 1.2;
-
   var r = origin.mesh.radius;
 
   for(var i = 0; i < amount; i++) {
@@ -643,7 +630,7 @@ Scene.prototype.createShips = function (origin, dest, amount) {
 
 Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
   var splineTargets = [];
-  var halfWayOffsetVector = halfWayOffsetVector || new THREE.Vector3(0, 50, 0);
+  halfWayOffsetVector = halfWayOffsetVector || new THREE.Vector3(0, 50, 0);
 
   var intersectionPathDirection = Math.random() > 0.5;
 
@@ -662,7 +649,7 @@ Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
     splineTargets.push(pos);
   });
 
-  if(intersections.length == 0) {
+  if(intersections.length === 0) {
     var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
 
     if(intersectionPathDirection)
@@ -730,7 +717,7 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
 
   // Start the animation
 
-  var tween = new TWEEN.Tween(shipsMesh.position.clone())
+  new TWEEN.Tween(shipsMesh.position.clone())
     .to(dest.mesh.position, tt)
     .easing(TWEEN.Easing.Linear.None)
     .interpolation(TWEEN.Interpolation.Bezier) // TODO: What happens without?
