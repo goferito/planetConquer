@@ -18,36 +18,36 @@ gulp.task('clean', function () {
 });
 
 gulp.task('css', function () {
-  return gulp.src('public/css/*.styl')
+  return gulp.src('src/public/css/*.styl')
       .pipe(stylus())
       .pipe(gulp.dest('build/css'));
 });
 
 gulp.task('assets', function () {
-  return gulp.src('public/assets/**/*')
+  return gulp.src('src/public/assets/**/*')
       .pipe(gulp.dest('build/assets'));
 });
 
 gulp.task('libs', function () {
   return gulp.src([
-      'public/js/three/three.js',
-      'public/js/three/OrbitControls.js',
-      'public/js/three/shaders/CopyShader.js',
-      'public/js/three/shaders/HorizontalBlurShader.js',
-      'public/js/three/shaders/VerticalBlurShader.js',
-      'public/js/three/shaders/GodrayShaders.js',
-      'public/js/three/postprocessing/ShaderPass.js',
-      'public/js/three/postprocessing/EffectComposer.js',
-      'public/js/three/postprocessing/MaskPass.js',
-      'public/js/three/postprocessing/RenderPass.js',
-      'public/js/tween/tween.min.js'
+      'src/public/js/three/three.js',
+      'src/public/js/three/OrbitControls.js',
+      'src/public/js/three/shaders/CopyShader.js',
+      'src/public/js/three/shaders/HorizontalBlurShader.js',
+      'src/public/js/three/shaders/VerticalBlurShader.js',
+      'src/public/js/three/shaders/GodrayShaders.js',
+      'src/public/js/three/postprocessing/ShaderPass.js',
+      'src/public/js/three/postprocessing/EffectComposer.js',
+      'src/public/js/three/postprocessing/MaskPass.js',
+      'src/public/js/three/postprocessing/RenderPass.js',
+      'src/public/js/tween/tween.min.js'
     ])
     .pipe(concat('libs.js'))
     .pipe(gulp.dest('build/js'));
 });
 
 gulp.task('js', function () {
-  return gulp.src('public/js/app.js')
+  return gulp.src('src/public/js/app.js')
     .pipe(jshint({
       indent: 2,
       newcap: true,
@@ -72,11 +72,11 @@ gulp.task('js', function () {
 });
 
 gulp.task('watch', function() {
-  gulp.watch('public/js/*.js', ['js']);
-  gulp.watch('public/js/three/**/*', ['libs']);
-  gulp.watch('public/js/tween/*.js', ['libs']);
-  gulp.watch('public/assets/**/*', ['assets']);
-  gulp.watch('public/css/*', ['css']);
+  gulp.watch('src/public/js/*.js', ['js']);
+  gulp.watch('src/public/js/three/**/*', ['libs']);
+  gulp.watch('src/public/js/tween/*.js', ['libs']);
+  gulp.watch('src/public/assets/**/*', ['assets']);
+  gulp.watch('src/public/css/*', ['css']);
 });
 
 gulp.task('default', ['watch', 'assets', 'libs', 'css', 'js']);

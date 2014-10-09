@@ -14,7 +14,6 @@ var conquerors_config = {
 };
 
 function init(){
-
   // Players can send ships every two seconds
   var turnTime = 2000;
 

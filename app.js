@@ -1,10 +1,9 @@
-
 /**
  * Module dependencies.
  */
 
 var express = require('express')
-  , routes = require('./routes')
+  , routes = require('./src/server/routes')
   , http = require('http')
   , path = require('path');
 
@@ -12,7 +11,7 @@ var app = express();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/src/server/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
 app.use(express.logger('dev'));
