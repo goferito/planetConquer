@@ -5,6 +5,7 @@ var concat = require('gulp-concat');
 var clean = require('gulp-clean');
 var browserify = require('gulp-browserify');
 var stylus = require('gulp-stylus');
+var stylish = require('jshint-stylish');
 
 gulp.task('clean', function () {
   return gulp.src(
@@ -46,9 +47,14 @@ gulp.task('libs', function () {
     .pipe(gulp.dest('build/js'));
 });
 
-gulp.task('js', function () {
-  return gulp.src('src/public/app.js')
+gulp.task('jshint', function () {
+  return gulp.src('src/public/*.js')
     .pipe(jshint({
+      globals: {
+        module: true,
+        THREE: true,
+        TWEEN: true
+      },
       indent: 2,
       newcap: true,
       noarg: true,
@@ -60,9 +66,13 @@ gulp.task('js', function () {
       maxlen: 80,
       expr: true,
       loopfunc: true,
-      strict: true,
       predef: ['window', 'document', 'require']
     }))
+    .pipe(jshint.reporter(stylish));
+});
+
+gulp.task('js', ['jshint'], function () {
+  return gulp.src('src/public/app.js')
     .pipe(browserify({
       insertGlobals: true,
       debug: true
