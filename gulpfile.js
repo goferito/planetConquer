@@ -48,7 +48,7 @@ gulp.task('libs', function () {
 });
 
 gulp.task('jshint', function () {
-  return gulp.src('src/public/*.js')
+  return gulp.src(['src/public/*.js', 'src/public/game/*.js'])
     .pipe(jshint({
       globals: {
         module: true,
@@ -86,6 +86,7 @@ gulp.task('js', ['jshint'], function () {
 
 gulp.task('watch', function() {
   gulp.watch('src/public/*.js', ['js']);
+  gulp.watch('src/public/game/*.js', ['js']);
   gulp.watch('src/public/libs/three/**/*', ['libs']);
   gulp.watch('src/public/libs/tween/*.js', ['libs']);
   gulp.watch('src/public/assets/**/*', ['assets']);

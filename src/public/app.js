@@ -1,6 +1,6 @@
-var Scene = require('./Scene');
-var AI = require('./AI');
-var Player = require('./Player');
+var Scene = require('./game/Scene');
+var AI = require('./game/AI');
+var Player = require('./game/Player');
 
 var conquerors_config = {
   conquerors: [
