@@ -209,8 +209,6 @@ Scene.prototype.initRenderer = function () {
     planet.mesh.position.x = planet.x;
     planet.mesh.position.y = planet.y;
     planet.mesh.position.z = planet.z;
-    // planet.mesh.position.y = radius;
-    // planet.mesh.position.z = Math.random() * 400 - 200;
     planet.mesh.radius = radius;
     planet.mesh.sphere = new THREE.Sphere(planet.mesh.position, radius);
 
@@ -269,16 +267,6 @@ Scene.prototype.initRenderer = function () {
     oclMesh.scale.set(2,2,2);
     this.oclScene.add(oclMesh);
   }
-
-  // awesome ship model
-
-  var loader = new THREE.JSONLoader();
-
-  loader.load('assets/ship/ship.json', function (geometry, materials) {
-    var ship = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-    this.shipMesh = ship;
-    this.shipMesh.scale.set(1.5, 1.5, 1.5);
-  }.bind(this));
 };
 
 Scene.prototype.toXYCoords = function (pos) {
