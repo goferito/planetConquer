@@ -12,6 +12,7 @@ var Fleet = function (origin, dest, amount, color) {
   this.dest = dest;
   this.color = color;
   this.ships = amount;
+  this.owner = origin.owner;
   this.start = new Date();
 
   // Generate mesh

@@ -6,6 +6,8 @@ var clean = require('gulp-clean');
 var browserify = require('gulp-browserify');
 var stylus = require('gulp-stylus');
 var stylish = require('jshint-stylish');
+var merge = require('merge');
+
 
 gulp.task('clean', function () {
   return gulp.src(
