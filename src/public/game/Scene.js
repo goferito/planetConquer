@@ -1,4 +1,5 @@
 var Fleet = require('./Fleet');
+var PlanetMaterials = require('./PlanetMaterials');
 
 var Scene = function(conquerors,
                      initialShips){
@@ -84,95 +85,6 @@ Scene.prototype.initRenderer = function () {
 
   this.sceneCube.add(skyBox);
   this.scene.add(skyBox);
-
-  var planetShininess = 40;
-  this.planetMaterials = [
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/earthmap1k.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/earthbump1k.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/jupitermap.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/mars_1k_color.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/marsbump1k.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/mercurymap.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/mercurybump.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/neptunemap.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/plutomap1k.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/plutobump1k.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/saturnmap.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/venusmap.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/planets/venusbump.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_1_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_2_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_3_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_4_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_5_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_7_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/Planet_Avalon_1600.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Dagobah1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Dam-Ba-Da1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Jinx1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Klendathu1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planets/planet_Terminus1200.jpg'),
-      shininess: planetShininess,
-    }),
-  ];
 
   this.renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -284,10 +196,10 @@ Scene.prototype.initRenderer = function () {
 
   this.render();
 
-  var randomizePlanetMaterials = Math.round(Math.random() * this.planetMaterials.length);
+  var randomizePlanetMaterials = Math.round(Math.random() * PlanetMaterials.length);
   this._planets.forEach(function (planet, i) {
     var radius = planet.ratio * 5;
-    var material = this.planetMaterials[(i + randomizePlanetMaterials) % this.planetMaterials.length];
+    var material = PlanetMaterials[(i + randomizePlanetMaterials) % PlanetMaterials.length];
 
     planet.mesh = new THREE.Mesh(
       new THREE.SphereGeometry(radius, 32, 32),
