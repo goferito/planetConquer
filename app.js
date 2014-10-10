@@ -2,10 +2,10 @@
  * Module dependencies.
  */
 
-var express = require('express')
-  , routes = require('./src/server/routes')
-  , http = require('http')
-  , path = require('path');
+var express = require('express'),
+    routes = require('./src/server/routes'),
+    http = require('http'),
+    path = require('path');
 
 var app = express();
 
