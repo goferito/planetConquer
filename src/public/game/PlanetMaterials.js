@@ -43,23 +43,11 @@ module.exports = [
     shininess: planetShininess,
   }),
   new THREE.MeshPhongMaterial({
-    map: new THREE.ImageUtils.loadTexture('assets/planets/planet_2_d.jpg'),
-    shininess: planetShininess,
-  }),
-  new THREE.MeshPhongMaterial({
     map: new THREE.ImageUtils.loadTexture('assets/planets/planet_3_d.jpg'),
     shininess: planetShininess,
   }),
   new THREE.MeshPhongMaterial({
-    map: new THREE.ImageUtils.loadTexture('assets/planets/planet_4_d.jpg'),
-    shininess: planetShininess,
-  }),
-  new THREE.MeshPhongMaterial({
     map: new THREE.ImageUtils.loadTexture('assets/planets/planet_5_d.jpg'),
-    shininess: planetShininess,
-  }),
-  new THREE.MeshPhongMaterial({
-    map: new THREE.ImageUtils.loadTexture('assets/planets/planet_7_d.jpg'),
     shininess: planetShininess,
   }),
   new THREE.MeshPhongMaterial({
