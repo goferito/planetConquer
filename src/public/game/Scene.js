@@ -1,3 +1,6 @@
+var Fleet = require('./Fleet');
+var PlanetMaterials = require('./PlanetMaterials');
+
 var Scene = function(conquerors,
                      initialShips){
 
@@ -64,10 +67,10 @@ Scene.prototype.initRenderer = function () {
 
   this.environmentMap = THREE.ImageUtils.loadTextureCube(urls);
 
-  var shader = THREE.ShaderLib['cube'];
-  shader.uniforms['tCube'].value = this.environmentMap;
+  var shader = THREE.ShaderLib.cube;
+  shader.uniforms.tCube.value = this.environmentMap;
 
-  var material = new THREE.ShaderMaterial({
+  var skyBoxMaterial = new THREE.ShaderMaterial({
     fragmentShader: shader.fragmentShader,
     vertexShader: shader.vertexShader,
     uniforms: shader.uniforms,
@@ -75,98 +78,13 @@ Scene.prototype.initRenderer = function () {
     side: THREE.BackSide
   });
 
-  var skyBox = new THREE.Mesh(new THREE.BoxGeometry(5200, 5200, 5200), material);
+  var skyBox = new THREE.Mesh(
+    new THREE.BoxGeometry(5200, 5200, 5200),
+    skyBoxMaterial
+  );
+
   this.sceneCube.add(skyBox);
   this.scene.add(skyBox);
-
-  var planetShininess = 40;
-  this.planetMaterials = [
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/earthmap1k.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/earthbump1k.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/jupitermap.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/mars_1k_color.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/marsbump1k.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/mercurymap.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/mercurybump.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/neptunemap.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/plutomap1k.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/plutobump1k.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/saturnmap.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/venusmap.jpg'),
-      bumpMap: new THREE.ImageUtils.loadTexture('assets/venusbump.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_1_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_2_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_3_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_4_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_5_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_7_d.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/Planet_Avalon_1600.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dagobah1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Dam-Ba-Da1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Jinx1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Klendathu1200.jpg'),
-      shininess: planetShininess,
-    }),
-    new THREE.MeshPhongMaterial({
-      map: new THREE.ImageUtils.loadTexture('assets/planet_Terminus1200.jpg'),
-      shininess: planetShininess,
-    }),
-  ];
 
   this.renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -221,10 +139,10 @@ Scene.prototype.initRenderer = function () {
 
   // Prepare the simple blur shader passes
   var bluriness = 1.0;
-  hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
-  vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
-  hblur.uniforms['h'].value = bluriness / window.innerWidth * 2;
-  vblur.uniforms['v'].value = bluriness / window.innerHeight * 2;
+  var hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+  var vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
+  hblur.uniforms.h.value = bluriness / window.innerWidth * 2;
+  vblur.uniforms.v.value = bluriness / window.innerHeight * 2;
 
   this.oclRenderPass = new THREE.RenderPass(this.oclScene, this.oclCamera);
 
@@ -254,10 +172,13 @@ Scene.prototype.initRenderer = function () {
   // Final Composer
   //
 
+  var lensDirtTexture = THREE.ImageUtils.loadTexture('assets/lens/lens3.jpg');
+
   this.mainRenderPass = new THREE.RenderPass(this.scene, this.camera);
 
   var finalPass = new THREE.ShaderPass(THREE.Extras.Shaders.Additive);
   finalPass.material.uniforms.tAdd.value = this.oclComposer.renderTarget1;
+  finalPass.material.uniforms.tLens.value = lensDirtTexture;
   finalPass.needsSwap = true;
   finalPass.renderToScreen = true;
 
@@ -275,10 +196,10 @@ Scene.prototype.initRenderer = function () {
 
   this.render();
 
-  var randomizePlanetMaterials = Math.round(Math.random() * this.planetMaterials.length);
+  var randomizePlanetMaterials = Math.round(Math.random() * PlanetMaterials.length);
   this._planets.forEach(function (planet, i) {
     var radius = planet.ratio * 5;
-    var material = this.planetMaterials[(i + randomizePlanetMaterials) % this.planetMaterials.length];
+    var material = PlanetMaterials[(i + randomizePlanetMaterials) % PlanetMaterials.length];
 
     planet.mesh = new THREE.Mesh(
       new THREE.SphereGeometry(radius, 32, 32),
@@ -288,8 +209,6 @@ Scene.prototype.initRenderer = function () {
     planet.mesh.position.x = planet.x;
     planet.mesh.position.y = planet.y;
     planet.mesh.position.z = planet.z;
-    // planet.mesh.position.y = radius;
-    // planet.mesh.position.z = Math.random() * 400 - 200;
     planet.mesh.radius = radius;
     planet.mesh.sphere = new THREE.Sphere(planet.mesh.position, radius);
 
@@ -348,16 +267,6 @@ Scene.prototype.initRenderer = function () {
     oclMesh.scale.set(2,2,2);
     this.oclScene.add(oclMesh);
   }
-
-  // awesome ship model
-
-  var loader = new THREE.JSONLoader();
-
-  loader.load('assets/ship/ship.json', function (geometry, materials) {
-    var ship = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-    this.shipMesh = ship;
-    this.shipMesh.scale.set(1.5, 1.5, 1.5);
-  }.bind(this));
 };
 
 Scene.prototype.toXYCoords = function (pos) {
@@ -381,7 +290,7 @@ Scene.prototype.projectOnScreen = function (pos) {
  * Renders the 3d scene with Three.js
  * @param <float> dt - elapsed time since last frame
  */
-Scene.prototype.render = function (dt) {
+Scene.prototype.render = function () {
   this.cameraCube.rotation.copy(this.camera.rotation);
   this.cameraCube.position.copy(this.camera.position);
 
@@ -403,7 +312,7 @@ Scene.prototype.animate = function () {
       p.mesh.rotation.y += 0.15 * dt;
   });
 
-  this.render(dt);
+  this.render();
 };
 
 Scene.prototype.onCameraChange = function () {
@@ -451,8 +360,8 @@ Scene.prototype.generatePlanets = function(conquerors,
   ];
 
   //TODO test this
-  var mapPos = Math.floor(Math.random() * maps.length)
-    , map = maps[mapPos]
+  var mapPos = Math.floor(Math.random() * maps.length),
+      map = maps[mapPos];
 
   //Put the players in the first planets
   conquerors.forEach(function(conq, i){
@@ -516,28 +425,17 @@ Scene.prototype.getConquerorColor = function(conqId){
  * Removes the fleets that have already got to their destination
  */
 Scene.prototype.updateFleets = function(){
-
-    var t = new Date()
-      , fleet;
+    var t = new Date(), fleet;
 
     for(var i in this._fleets){
       fleet = this._fleets[i];
 
-      var dist = getDistance(fleet.origin, fleet.dest)
-
-        // Trip time
-        , tt = dist / this._speed
-
-        // Elapsed time
-        , elapsed = t - fleet.start
-
-        // Percent travelled
-        , pTravelled = elapsed / tt;
-
+      var dist = getDistance(fleet.origin, fleet.dest),
+          tt = dist / this._speed,
+          elapsed = t - fleet.start;
 
       // If travelled 100% percent of the trip
       if(elapsed >= tt){
-
         // Add ships to the new planet
         if(fleet.owner != fleet.dest.owner){
           fleet.dest.ships -= fleet.ships;
@@ -549,18 +447,14 @@ Scene.prototype.updateFleets = function(){
             // Planet Conquered!!
             fleet.dest.owner = fleet.owner;
           }
-
         }else{
           fleet.dest.ships += fleet.ships;
         }
 
         // Remove fleet from fleets list
         this._fleets.splice(i, 1);
-
       }
-
     }
-
 };
 
 /**
@@ -602,86 +496,6 @@ Scene.prototype.intersectPlanets = function (origin, dest, maxDistance) {
   return intersections;
 };
 
-Scene.prototype.createShips = function (origin, dest, amount) {
-  var ships = new THREE.Object3D();
-  var color = this.getConquerorColor(origin.owner);
-
-  var material = new THREE.MeshFaceMaterial([
-    new THREE.MeshPhongMaterial({color: color, shininess: 50}),
-    new THREE.MeshPhongMaterial({color: color, shininess: 5})
-  ]);
-
-  var d = 1.2;
-
-  var r = origin.mesh.radius;
-
-  for(var i = 0; i < amount; i++) {
-    var mesh = this.shipMesh.clone();
-
-    mesh.material = material;
-
-    var dx = Math.random() * amount - amount / 2;
-    var dy = Math.random() * amount - amount / 2;
-    var dz = Math.random() * amount - amount / 2;
-
-    mesh.position.x = Math.min(Math.max(dx, -r), r);
-    mesh.position.y = Math.min(Math.max(dy, -r), r);
-    mesh.position.z = Math.min(Math.max(dz, -r), r);
-
-    mesh.scale.set(1.5, 1.5, 1.5);
-
-    ships.add(mesh);
-  }
-
-  ships.position.copy(origin.mesh.position);
-
-  return ships;
-};
-
-Scene.prototype.getFleetSpline = function (origin, dest, halfWayOffsetVector) {
-  var splineTargets = [];
-  var halfWayOffsetVector = halfWayOffsetVector || new THREE.Vector3(0, 50, 0);
-
-  var intersectionPathDirection = Math.random() > 0.5;
-
-  var directLine = dest.mesh.position.clone().sub(origin.mesh.position);
-  var direction = directLine.clone().normalize();
-
-  var startPosition = origin.mesh.position.clone();
-  startPosition.add(direction.clone().multiplyScalar(origin.mesh.radius));
-
-  splineTargets.push(startPosition);
-
-  var intersections = this.intersectPlanets(origin, dest, directLine.length());
-  intersections.forEach(function (intersect) {
-    var pos = intersect.position.clone();
-    pos.y += (intersectionPathDirection ? intersect.radius : -intersect.radius) * 2;
-    splineTargets.push(pos);
-  });
-
-  if(intersections.length == 0) {
-    var halfWayPosition = startPosition.clone().add(directLine.clone().multiplyScalar(0.5));
-
-    if(intersectionPathDirection)
-      halfWayPosition.add(halfWayOffsetVector);
-    else
-      halfWayPosition.sub(halfWayOffsetVector);
-
-    splineTargets.push(halfWayPosition);
-  }
-
-  var destPosition = dest.mesh.position.clone();
-  splineTargets.push(destPosition);
-
-  // randomize y offsets
-  for(var i = 1; i < splineTargets.length - 1; i++)
-    splineTargets[i].y += Math.random() * 30 - 15;
-
-  var spline = new THREE.SplineCurve3(splineTargets);
-
-  return spline;
-};
-
 Scene.prototype.sendFleet = function (origin, dest, ships) {
   // Check it's not trying to send more ships than the available
   if(origin.ships < ships) return false;
@@ -693,9 +507,12 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
   var distance = origin.mesh.position.distanceTo(dest.mesh.position);
   var tt = distance / this._speed;
 
+  var color = this.getConquerorColor(origin.owner);
+  var fleet = new Fleet(origin, dest, ships, color);
+
   // Generate fleet route
 
-  var spline = this.getFleetSpline(origin, dest);
+  var spline = fleet.getSpline(this);
   var geometry = new THREE.Geometry();
   var splinePoints = spline.getPoints(42);
 
@@ -712,31 +529,24 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
 
   // Generate tiny 3d ships
 
-  var shipsMesh = this.createShips(origin, dest, ships);
-  this.scene.add(shipsMesh);
+  this.scene.add(fleet.getMesh());
 
   // Add the fleet to the fleets array
 
-  this._fleets.push({
-    origin: origin,
-    dest: dest,
-    owner: origin.owner,
-    ships: ships,
-    start: new Date(),
-  });
+  this._fleets.push(fleet);
 
   // Start the animation
 
-  var tween = new TWEEN.Tween(shipsMesh.position.clone())
+  new TWEEN.Tween(fleet.getMesh().position.clone())
     .to(dest.mesh.position, tt)
     .easing(TWEEN.Easing.Linear.None)
     .interpolation(TWEEN.Interpolation.Bezier) // TODO: What happens without?
     .onUpdate(function (t) {
-      shipsMesh.position.copy(spline.getPoint(t));
-      shipsMesh.lookAt(spline.getPoint(t+0.001));
+      fleet.getMesh().position.copy(spline.getPoint(t));
+      fleet.getMesh().lookAt(spline.getPoint(t+0.001));
     })
     .onComplete(function () {
-      this.scene.remove(shipsMesh);
+      this.scene.remove(fleet.getMesh());
       this.scene.remove(splineMesh);
 
       this.updateFleets();
@@ -756,3 +566,5 @@ Scene.prototype.sendFleet = function (origin, dest, ships) {
 function getDistance(origin, dest){
   return origin.mesh.position.distanceTo(dest.mesh.position);
 }
+
+module.exports = Scene;

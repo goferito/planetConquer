@@ -1,6 +1,19 @@
+var Scene = require('./game/Scene');
+var AI = require('./game/AI');
+var Player = require('./game/Player');
+
+var conquerors_config = {
+  conquerors: [
+    { name: 'Saa',  color: 0x3333ff,  ai: AI.culoVeo },
+    { name: 'Adam', color: 0xff3333,   ai: AI.culoVeo },
+    { name: 'Tilo', color: 0x33ff00, ai: AI.culoVeo },
+    { name: 'Ray',  color: 0x33ffff,  ai: AI.culoVeo }
+  ],
+
+  conquerorsInitialShips: 30
+};
 
 function init(){
-
   // Players can send ships every two seconds
   var turnTime = 2000;
 
@@ -18,7 +31,7 @@ function init(){
     });
 
     myScene.growRatios();
-  }, turnTime)
+  }, turnTime);
 }
 
 window.onload = init;

@@ -31,7 +31,7 @@
  *
  * List with the functions available for each Player:
  *
- *   this.getMyPlanets() 
+ *   this.getMyPlanets()
  *     Returns an array with the planet objects owned by the player
  *
  *   this.getPlanets()
@@ -53,7 +53,7 @@
  *
  */
 
-
+var AI = module.exports = {};
 
 /***************************/
 /*     My AI Functions     */
@@ -68,26 +68,19 @@
  * and send just the necessary ships to it.
  *
  */
-var culoVeo = function(){
-  
+AI.culoVeo = function(){
   var _this = this;
-
   _this.getMyPlanets().forEach(function(myPlanet){
-
     _this.getPlanets().forEach(function(planet){
-
       // Don't send a fleet to a planet I already own
       if(planet.owner == _this.name) return;
 
       if(myPlanet.ships > planet.ships){
         _this.sendFleet(myPlanet, planet, planet.ships + 1);
       }
-      
       return;
     });
-
   });
-
 };
 
 
@@ -95,7 +88,7 @@ var culoVeo = function(){
  * AI that does nothing but reporting the planets situation
  * on every turn
  */
-var lazyReporter = function(){
+AI.lazyReporter = function(){
   console.log('I\'m ' + this.name + ', reporting planets situation:');
   // console.log(this.getPlanets());
 };

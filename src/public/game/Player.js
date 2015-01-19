@@ -1,11 +1,9 @@
-
 var Player = function(name, color, ai, scene){
   this.name = name;
   this.color = color;
   this.ai = ai || function(){};
 
   this.scene = scene;
-
 };
 
 
@@ -56,7 +54,7 @@ Player.prototype.sendFleet = function(origin, dest, ships){
     return false;
   }
 
-  return this.scene.sendFleet(origin, dest, ships)
-  
+  return this.scene.sendFleet(origin, dest, ships);
 };
 
+module.exports = Player;
